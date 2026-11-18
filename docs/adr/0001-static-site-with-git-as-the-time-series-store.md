@@ -1,0 +1,3 @@
+# Static site, with the git repo as the time-series store
+
+The monitor must run for months at zero cost, so there is no server and no database. The React app is served from GitHub Pages and calls keyless, CORS-friendly sources (including WebSockets) directly from the browser. A scheduled GitHub Actions job fetches the sources that need a key or block browsers, and commits compact JSON snapshots back to the repo. Those committed snapshots are the before/after history the dashboard plots. API keys live only in GitHub secrets and are never shipped to the browser. We accepted that only browser-direct streams update every second, and that everything else refreshes at the cron cadence (5–15 min, best-effort).
