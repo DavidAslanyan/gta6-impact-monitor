@@ -447,18 +447,18 @@ const HISTORY = [
         'Algebra', 'Newton%27s_laws_of_motion', 'Water_cycle', 'Roman_Empire'];
       const start = ymdCompact(new Date((now - (backfill ? 40 : 4) * DAY) * 1000));
       const end = ymdCompact(new Date(now * 1000));
-      const total = new Map();
-      let ok = 0;
+      // Each article is stored as its own series; bundle.mjs sums them into the index only for days where all
+      // articles are present, so a rate-limited article just fills in on a later run instead of making a fake dip.
+      const out = {};
       for (const a of basket) {
         try {
           const j = await getJson(`https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/${a}/daily/${start}00/${end}00`, { headers: WIKI_UA });
-          for (const it of j.items) total.set(wikiTs(it.timestamp), (total.get(wikiTs(it.timestamp)) || 0) + it.views);
-          ok++;
+          out[`study.wiki.${decodeURIComponent(a).toLowerCase().replace(/[^a-z0-9]+/g, '_')}.daily`] = j.items.map((it) => [wikiTs(it.timestamp), it.views]);
         } catch {}
         await sleep(1200);
       }
-      if (ok !== basket.length) throw new Error(`homework basket incomplete (${ok}/${basket.length})`);
-      return { 'study.homework_index.daily': [...total.entries()] };
+      if (!Object.keys(out).length) throw new Error('homework basket: no article answered');
+      return out;
     },
   },
   {
@@ -551,6 +551,9 @@ await Promise.all(
 );
 
 await writeJson(stateFile, state);
+const { SOURCES } = await import('./sources.mjs');
+const known = new Set([...HISTORY.map((h) => h.key), ...SOURCES.map((x) => x.key)]);
+for (const k of Object.keys(health)) if (!known.has(k)) delete health[k];
 await writeJson(join(DATA, 'health.json'), health);
 await writeJson(join(DATA, 'latest.json'), latest);
 console.log(`[${new Date(now * 1000).toISOString()}] history run done`);

@@ -66,6 +66,18 @@ for (const id of ids) {
   }
 }
 
+// Derived: the Homework index = sum of the 16 basket articles, only on days where every article is present.
+const basket = ids.filter((id) => id.startsWith('study.wiki.'));
+if (basket.length === 16) {
+  const per = await Promise.all(basket.map(readSeries));
+  const days = new Map();
+  for (const pts of per) for (const [t, v] of pts) { const d = days.get(t) || [0, 0]; d[0] += v; d[1]++; days.set(t, d); }
+  const pts = [...days.entries()].filter(([, [, n]]) => n === basket.length).map(([t, [sum]]) => [t, sum]).sort((a, b) => a[0] - b[0]);
+  const g = grid(pts.filter(([t]) => t + 86400 <= now), 86400, BUNDLE_START, now);
+  if (g) hourly['study.homework_index.daily'] = g;
+}
+for (const id of basket) delete hourly[id];
+
 await writeJson(join(DATA, 'bundle', 'hourly.json'), { generated: now, series: hourly }, false);
 await writeJson(join(DATA, 'bundle', 'recent.json'), { generated: now, series: recent }, false);
 console.log(`bundle: ${Object.keys(hourly).length} hourly, ${Object.keys(recent).length} recent series`);
