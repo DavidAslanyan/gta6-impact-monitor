@@ -1,6 +1,6 @@
 # GTA VI Global Impact Monitor
 
-**Live:** https://davidaslanyan.github.io/gta6-impact-monitor/
+**Live:** https://grandworldafter.com/
 
 A live, data-driven record of what happened to the world while Grand Theft Auto VI unlocked, one midnight at a time, starting in New Zealand on 18 Nov 2026 11:00 UTC. It covers markets, power grids, developer activity, internet attention, every other game, streets and bikes, and console networks. Everything is compared against the four weeks before launch.
 
