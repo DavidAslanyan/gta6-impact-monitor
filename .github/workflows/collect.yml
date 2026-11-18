@@ -42,7 +42,8 @@ jobs:
           EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           SEC_CONTACT: ${{ secrets.SEC_CONTACT }}
-        run: ./collector/loop.sh
+        # Run the loop from memory so pulling a newer collector/loop.sh mid-run cannot corrupt the running script.
+        run: bash -c "$(cat collector/loop.sh)"
       - name: Start the next run
         if: always()
         env:

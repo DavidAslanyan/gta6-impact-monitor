@@ -454,7 +454,7 @@ const HISTORY = [
           for (const it of j.items) total.set(wikiTs(it.timestamp), (total.get(wikiTs(it.timestamp)) || 0) + it.views);
           ok++;
         } catch {}
-        await sleep(400);
+        await sleep(1200);
       }
       if (ok !== basket.length) throw new Error(`homework basket incomplete (${ok}/${basket.length})`);
       return { 'study.homework_index.daily': [...total.entries()] };
@@ -481,15 +481,21 @@ const HISTORY = [
     },
   },
   {
-    key: 'fred',
+    key: 'dol-claims',
     everyMinutes: 180,
     async run() {
-      const csv = await getText('https://fred.stlouisfed.org/graph/fredgraph.csv?id=ICSA&cosd=2026-01-01', { timeoutMs: 120000 });
-      const pts = csv.split('\n').slice(1).filter(Boolean).map((l) => {
-        const [d, v] = l.split(',');
-        return [Date.parse(d) / 1000, +v];
-      });
-      return { 'control.us.jobless_claims.weekly': pts };
+      // US Department of Labor ETA-539: weekly initial unemployment claims by state (column c3). Summed across
+      // states this is the national, NOT seasonally adjusted, initial-claims count. (FRED blocks cloud runners.)
+      const csv = await getText('https://oui.doleta.gov/unemploy/csv/ar539.csv', { timeoutMs: 120000 });
+      const by = new Map();
+      for (const line of csv.split('\n').slice(1)) {
+        const c = line.split(',');
+        if (c.length < 5) continue;
+        const d = c[1].replaceAll('"', '');
+        if (d < '2026-01-01') continue;
+        by.set(d, (by.get(d) || 0) + (+c[4] || 0));
+      }
+      return { 'control.us.jobless_claims_nsa.weekly': [...by.entries()].map(([d, v]) => [Date.parse(d) / 1000, v]) };
     },
   },
 ];

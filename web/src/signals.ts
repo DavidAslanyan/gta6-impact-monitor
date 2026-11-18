@@ -175,7 +175,7 @@ export const SIGNALS: Signal[] = [
   S({ id: 'control.weather.sydney.temp_c', label: 'Sydney temperature', group: 'control', unit: '°C', fmt: 'temp', region: 'oceania', source: 'Open-Meteo', sourceUrl: 'https://open-meteo.com/', note: 'Weather control for NSW demand.' }),
   S({ id: 'control.weather.auckland.temp_c', label: 'Auckland temperature', group: 'control', unit: '°C', fmt: 'temp', region: 'oceania', source: 'Open-Meteo', sourceUrl: 'https://open-meteo.com/', note: 'Weather control for New Zealand.' }),
   S({ id: 'control.earthquakes_m25.daily', label: 'Earthquakes of magnitude 2.5+ worldwide', group: 'control', unit: 'quakes/day', fmt: 'int', region: 'americas', source: 'USGS', sourceUrl: 'https://earthquake.usgs.gov/', note: 'The planet does not care about video games. If this "moves", that is just noise — a useful reminder.' }),
-  S({ id: 'control.us.jobless_claims.weekly', label: 'US initial jobless claims', group: 'control', unit: 'claims/week', fmt: 'int', region: 'americas', source: 'FRED (U.S. Dept. of Labor)', sourceUrl: 'https://fred.stlouisfed.org/series/ICSA', note: 'Weekly US jobless claims. A video game should not move this — if it does, look for another cause.' }),
+  S({ id: 'control.us.jobless_claims_nsa.weekly', label: 'US initial jobless claims (not seasonally adjusted)', group: 'control', unit: 'claims/week', fmt: 'int', region: 'americas', source: 'U.S. Department of Labor (ETA 539)', sourceUrl: 'https://oui.doleta.gov/unemploy/claims.asp', note: 'Weekly US jobless claims. A video game should not move this — if it does, look for another cause.' }),
 ]
 
 // Third-party aggregators or community projects (documented, public, but not the original publisher).

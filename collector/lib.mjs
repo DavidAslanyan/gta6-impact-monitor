@@ -13,7 +13,14 @@ export const UA = {
 
 export async function getText(url, { headers = {}, timeoutMs = 25000, retries = 2 } = {}) {
   for (let attempt = 0; ; attempt++) {
-    const res = await fetch(url, { headers: { ...UA, ...headers }, signal: AbortSignal.timeout(timeoutMs) });
+    let res;
+    try {
+      res = await fetch(url, { headers: { ...UA, ...headers }, signal: AbortSignal.timeout(timeoutMs) });
+    } catch (e) {
+      // Network error or timeout: retry with backoff before giving up.
+      if (attempt < retries) { await new Promise((r) => setTimeout(r, 2000 * 2 ** attempt)); continue; }
+      throw e;
+    }
     if (res.ok) return res.text();
     // Rate-limited or a transient server error: back off and retry a couple of times.
     if ((res.status === 429 || res.status >= 500) && attempt < retries) {

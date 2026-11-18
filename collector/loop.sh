@@ -5,6 +5,8 @@ set -u
 END=$(( $(date +%s) + ${LOOP_MINUTES:-345} * 60 ))
 cd "$(dirname "$0")/.."
 while [ "$(date +%s)" -lt "$END" ]; do
+  # Pick up collector fixes pushed to main without waiting for the next run (this script runs from memory).
+  git pull -q --ff-only origin main 2>/dev/null || true
   node collector/snapshot.mjs || true
   node collector/history.mjs || true
   node collector/bundle.mjs || true
