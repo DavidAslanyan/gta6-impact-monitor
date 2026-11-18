@@ -9,6 +9,8 @@ export interface Expectation { mean: number; std: number; n: number; mode: Basel
 export interface BaselineModel {
   launch: number
   daily: boolean
+  /** Length of one data bucket in seconds (3600 for hourly, 86400 daily, 604800 weekly). */
+  bucket: number
   /** How many hours of pre-launch data the Baseline has. */
   spanHours: number
   points: number
@@ -50,15 +52,23 @@ function step(points: Point[]) {
 }
 
 /** A point is "before launch" only if its whole bucket ended before the launch (daily buckets straddle it). */
-export const isPre = (model: BaselineModel, t: number) => (model.daily ? t + DAY <= model.launch : t < model.launch)
+export const isPre = (model: BaselineModel, t: number) => (model.daily ? t + model.bucket <= model.launch : t < model.launch)
+
+/** Local hour of day (0–23) in a Signal's home region. */
+export const localHour = (t: number, region: Region) => localParts(t, REGION_TZ[region]).h
 
 export function buildBaseline(signal: Signal, hourly: Point[]): BaselineModel | null {
   const launch = REGION_LAUNCH[signal.region]
-  const daily = step(hourly) >= 20 * HOUR
-  const pre = hourly.filter(([t]) => (daily ? t + DAY <= launch : t < launch) && t >= launch - BASELINE_DAYS * DAY)
+  const gap = step(hourly)
+  const daily = gap >= 20 * HOUR
+  const bucket = gap >= 6 * DAY ? 7 * DAY : daily ? DAY : HOUR
+  const weekly = bucket === 7 * DAY
+  // Weekly series get a longer window so the Baseline has more than four points.
+  const windowDays = weekly ? 10 * 7 : BASELINE_DAYS
+  const pre = hourly.filter(([t]) => (daily ? t + bucket <= launch : t < launch) && t >= launch - windowDays * DAY)
   if (!pre.length) return null
   const spanHours = (launch - pre[0][0]) / HOUR
-  const base = { launch, daily, spanHours, points: pre.length }
+  const base = { launch, daily, bucket, spanHours, points: pre.length }
 
   // Prices: compare with the last value before launch ("since launch").
   if (signal.group === 'markets' && signal.fmt !== 'int') {
@@ -98,6 +108,7 @@ export function buildBaseline(signal: Signal, hourly: Point[]): BaselineModel | 
   return {
     ...base,
     expected(t: number) {
+      if (weekly) return overall
       const { wd, h } = daily ? { wd: new Date(t * 1000).getUTCDay(), h: 0 } : localParts(t, tz)
       const k = daily ? wd : wd * 24 + h
       const hit = cache.get(k)

@@ -31,6 +31,8 @@ export const GROUP_COLOR: Record<Group, string> = {
   commute: '#5eead4',
   crypto: '#f7931a',
   radar: '#ff5f7e',
+  safety: '#60a5fa',
+  lifestyle: '#f472b6',
 }
 
 export type Range = '48h' | '7d' | '30d'

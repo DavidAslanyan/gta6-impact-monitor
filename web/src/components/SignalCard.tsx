@@ -38,7 +38,11 @@ export function SignalCard({ signal, big = false }: { signal: Signal; big?: bool
   const option = useMemo(() => {
     // Zoom in on Signals that started recording recently instead of leaving the chart mostly empty.
     const first = pts.length ? pts[0][0] : nowS
-    const from = Math.max(nowS - RANGE_SECONDS[range], Math.min(first - 3600, nowS - 6 * 3600))
+    const lastT = pts.length ? pts[pts.length - 1][0] : nowS
+    // Daily series can lag by days (settled crime reports, Wikipedia): anchor the window on the latest day so the
+    // chart is never empty, while the axis still runs to "now" so the unlock markers stay visible.
+    const anchor = periodic ? Math.min(nowS, lastT + 86400) : nowS
+    const from = Math.max(anchor - RANGE_SECONDS[range], Math.min(first - 3600, nowS - 6 * 3600))
     const shown = pts.filter((p) => p[0] >= from)
     const main = shown.map((p) => [p[0] * 1000, p[1]])
     // Expected band from the Baseline, after launch only (sampled hourly to stay light).
@@ -104,7 +108,7 @@ export function SignalCard({ signal, big = false }: { signal: Signal; big?: bool
         },
       ],
     }
-  }, [pts, model, hourly, range, color, signal, nowS])
+  }, [pts, model, hourly, range, color, signal, nowS, periodic])
 
   const dGood = delta ? (signal.inverted ? -delta.pct : delta.pct) : 0
   const showAbs = signal.fmt === 'rank' || signal.fmt === 'level' || signal.fmt === 'temp'
@@ -150,7 +154,9 @@ export function SignalCard({ signal, big = false }: { signal: Signal; big?: bool
           ) : periodic ? (
             <>First post-launch {signal.id.endsWith('.weekly') ? 'week' : 'day'} not complete yet · </>
           ) : null}
-          {latest ? <span className={stale ? 'stale' : ''}>updated {fmtAgo(latest[0])}</span> : null} ·{' '}
+          {latest ? (periodic
+            ? <span>latest {signal.id.endsWith('.weekly') ? 'week' : 'day'}: {new Date(latest[0] * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}</span>
+            : <span className={stale ? 'stale' : ''}>updated {fmtAgo(latest[0])}</span>) : null} ·{' '}
           {signal.source}
         </span>
         <span className="card__links">

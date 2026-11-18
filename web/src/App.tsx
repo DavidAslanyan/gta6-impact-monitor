@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { AnomalyFeed, SignalSection } from './components/Sections'
+import { AllSections, AnomalyFeed, BiggestMoves } from './components/Sections'
 import { Hero } from './components/Hero'
 import { LivePulse } from './components/LivePulse'
 import { LossModel } from './components/LossModel'
 import { Footer, Methodology } from './components/Methodology'
 import { Author } from './components/Author'
+import { Hypotheses } from './components/Hypotheses'
 import { Ticker } from './components/Ticker'
 import { Trailers } from './components/Trailers'
 import { UnlockMap } from './components/UnlockMap'
@@ -14,9 +15,9 @@ import { DEFAULT_PARAMS, type LossParams } from './model/loss'
 import { RangeContext, type Range } from './theme'
 
 const NAV = [
-  ['pulse', 'Live'], ['timeline', 'Timeline'], ['wave', 'Unlock wave'], ['attention', 'Cause'], ['games', 'Games'],
-  ['productivity', 'Work'], ['study', 'School'], ['commute', 'Commute'], ['markets', 'Markets'], ['crypto', 'Crypto'],
-  ['energy', 'Grid'], ['mobility', 'Streets'], ['radar', 'Radar'], ['status', 'Load'], ['control', 'Controls'],
+  ['pulse', 'Live'], ['effect', 'The GTA Effect'], ['moves', 'Biggest moves'], ['timeline', 'Timeline'], ['wave', 'Unlock wave'], ['attention', 'Cause'],
+  ['games', 'Games'], ['productivity', 'Work'], ['energy', 'Grid'], ['commute', 'Commute'], ['mobility', 'Streets'],
+  ['safety', 'Crime'], ['lifestyle', 'Home life'], ['markets', 'Markets'], ['crypto', 'Crypto'], ['radar', 'Radar'], ['study', 'School'], ['status', 'Load'], ['control', 'Controls'],
   ['loss', 'Scenario'], ['method', 'Method'],
 ] as const
 
@@ -50,20 +51,11 @@ export default function App() {
       </nav>
       <main>
         <LivePulse />
+        <Hypotheses />
+        <BiggestMoves />
         <AnomalyFeed />
         <UnlockMap />
-        <SignalSection group="attention" />
-        <SignalSection group="games" />
-        <SignalSection group="productivity" />
-        <SignalSection group="study" />
-        <SignalSection group="commute" />
-        <SignalSection group="markets" />
-        <SignalSection group="crypto" />
-        <SignalSection group="energy" />
-        <SignalSection group="mobility" />
-        <SignalSection group="radar" />
-        <SignalSection group="status" />
-        <SignalSection group="control" />
+        <AllSections />
         <LossModel params={lossParams} setParams={setLossParams} />
         <Trailers />
         <Methodology />

@@ -290,3 +290,41 @@ input[type='range'] { accent-color: var(--pink); width: 100%; }
 .author__links a { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12.5px; text-decoration: none !important; }
 .author__links a:hover { color: var(--text); }
 @media (max-width: 720px) { .author { flex-wrap: wrap; } .author__links { width: 100%; padding-left: 58px; } }
+.grid--moves { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
+/* ── The GTA Effect */
+.hyp-summary { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.hyp-summary__item { padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,0.05); font-size: 13px; color: var(--muted); }
+.hyp-summary__item b { font-size: 16px; margin-right: 4px; color: var(--text); }
+.hyp-table { overflow: hidden; }
+.hyp__head, .hyp__main { display: grid; grid-template-columns: 40px minmax(0, 1.6fr) repeat(3, minmax(0, 1fr)); gap: 12px; align-items: center; }
+.hyp__head { padding: 12px 16px; font: 600 11px 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); border-bottom: 1px solid var(--line); }
+.hyp__head small { text-transform: none; letter-spacing: 0; font-weight: 400; margin-left: 4px; }
+.hyp { border-bottom: 1px solid rgba(255,255,255,0.05); }
+.hyp:last-child { border-bottom: 0; }
+.hyp__main { all: unset; box-sizing: border-box; display: grid; grid-template-columns: 40px minmax(0, 1.6fr) repeat(3, minmax(0, 1fr)); gap: 12px; align-items: center; width: 100%; padding: 12px 16px; cursor: pointer; }
+.hyp__main:hover { background: rgba(255,255,255,0.03); }
+.hyp__emoji { font-size: 22px; text-align: center; }
+.hyp__claim b { display: block; font-size: 14.5px; font-weight: 600; }
+.hyp__claim small { color: var(--dim); font-size: 12px; }
+.hyp__cell { display: flex; flex-direction: column; gap: 3px; }
+.hyp__chip { display: inline-block; width: fit-content; font: 600 11px 'JetBrains Mono', monospace; padding: 4px 9px; border-radius: 999px; }
+.hyp__fx { font-size: 11px; color: var(--dim); }
+.v-sup .hyp__chip, .hyp-summary__item.v-sup { background: rgba(61,245,200,0.12); color: var(--teal); }
+.v-con .hyp__chip, .hyp-summary__item.v-con { background: rgba(255,95,126,0.12); color: var(--down); }
+.v-none .hyp__chip, .hyp-summary__item.v-none { background: rgba(255,209,102,0.10); color: var(--gold); }
+.v-wait .hyp__chip, .hyp-summary__item.v-wait { background: rgba(255,255,255,0.05); color: var(--dim); }
+span.v-sup { color: var(--teal); } span.v-con { color: var(--down); } span.v-none { color: var(--gold); } span.v-wait { color: var(--dim); }
+.hyp__detail { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding: 4px 16px 16px 68px; }
+.hyp__phase-title { font-weight: 700; font-size: 12.5px; margin-bottom: 6px; }
+.hyp__phase-title span { color: var(--dim); font-weight: 400; }
+.hyp__test { display: flex; flex-direction: column; font-size: 12px; padding: 6px 0; border-top: 1px solid rgba(255,255,255,0.05); }
+.hyp-unmeasurable { margin-top: 14px; font-size: 13px; color: var(--muted); }
+.hyp-unmeasurable ul { margin: 6px 0 0; padding-left: 18px; }
+.hyp-unmeasurable li span { color: var(--text); }
+@media (max-width: 900px) {
+  .hyp__head { display: none; }
+  .hyp__main { grid-template-columns: 32px 1fr; }
+  .hyp__cell { grid-column: 2; flex-direction: row; align-items: center; gap: 8px; }
+  .hyp__cell::before { content: attr(data-phase); min-width: 54px; font: 600 10.5px "JetBrains Mono", monospace; color: var(--dim); text-transform: uppercase; }
+  .hyp__detail { grid-template-columns: 1fr; padding-left: 16px; }
+}

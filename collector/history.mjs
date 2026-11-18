@@ -482,8 +482,76 @@ const HISTORY = [
     },
   },
   {
+    key: 'city-incidents',
+    everyMinutes: 60,
+    async run() {
+      // City open-data incident reports, counted per local day. Reports for a day keep arriving for days afterwards,
+      // so a day is only recorded once it has SETTLED (settleDays old). Otherwise recent days would look like fake drops.
+      const cities = [
+        { id: 'safety.sf.police_incidents.daily', url: 'https://data.sfgov.org/resource/wg3w-h783.json', field: 'incident_datetime', settleDays: 5 },
+        { id: 'safety.seattle.offenses.daily', url: 'https://data.seattle.gov/resource/tazs-3rd5.json', field: 'offense_date', settleDays: 5 },
+        { id: 'safety.chicago.crimes.daily', url: 'https://data.cityofchicago.org/resource/ijzp-q8t2.json', field: 'date', settleDays: 10 },
+        { id: 'safety.nyc.noise_complaints.daily', url: 'https://data.cityofnewyork.us/resource/erm2-nwe9.json', field: 'created_date', settleDays: 3, where: " AND complaint_type LIKE 'Noise%'" },
+      ];
+      const since = ymd(new Date((now - 60 * DAY) * 1000));
+      const out = {};
+      for (const c of cities) {
+        const soql = `SELECT date_trunc_ymd(${c.field}) AS d, count(*) AS n WHERE ${c.field} > '${since}'${c.where || ''} GROUP BY d ORDER BY d LIMIT 200`;
+        try {
+          const rows = await getJson(`${c.url}?$query=${encodeURIComponent(soql)}`, { timeoutMs: 60000 });
+          const cutoff = now - c.settleDays * DAY;
+          out[c.id] = rows
+            .map((r) => [Date.parse(r.d.slice(0, 10)) / 1000, +r.n])
+            .filter(([t]) => t + DAY <= cutoff);
+        } catch {}
+        await sleep(500);
+      }
+      if (!Object.keys(out).length) throw new Error('no city answered');
+      return out;
+    },
+  },
+  {
+    key: 'netflix-weekly',
+    everyMinutes: 360,
+    replace: true,
+    async run() {
+      // Netflix's own global Top 10 file: hours viewed for the top 10 titles in each of 4 categories, per week (Mon–Sun).
+      const tsv = await getText('https://www.netflix.com/tudum/top10/data/all-weeks-global.tsv', { timeoutMs: 60000, headers: { 'User-Agent': 'Mozilla/5.0', Accept: '*/*' } });
+      if (!tsv.startsWith('week\t')) throw new Error('Netflix returned a web page instead of the TSV file');
+      const by = new Map();
+      for (const line of tsv.split('\n').slice(1)) {
+        const c = line.split('\t');
+        if (c.length < 6 || c[0] < '2026-08-01') continue;
+        by.set(c[0], (by.get(c[0]) || 0) + (+c[5] || 0));
+      }
+      // The file's date is the week's last day (Sunday); stamp at the week's start.
+      return { 'lifestyle.netflix.top10_hours.weekly': [...by.entries()].map(([d, v]) => [Date.parse(d) / 1000 - 6 * DAY, v]) };
+    },
+  },
+  {
+    key: 'wiki-curiosity',
+    everyMinutes: 60,
+    async run(backfill) {
+      // What people read about: daily English-Wikipedia views of a few telling articles.
+      const articles = { insomnia: 'Insomnia', sleep_deprivation: 'Sleep_deprivation', back_pain: 'Low_back_pain', eye_strain: 'Computer_vision_syndrome', pizza: 'Pizza', energy_drink: 'Energy_drink', miami: 'Miami' };
+      const start = ymdCompact(new Date((now - (backfill ? 40 : 4) * DAY) * 1000));
+      const end = ymdCompact(new Date(now * 1000));
+      const out = {};
+      for (const [slug, title] of Object.entries(articles)) {
+        try {
+          const j = await getJson(`https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/${title}/daily/${start}00/${end}00`, { headers: WIKI_UA });
+          out[`lifestyle.wiki.${slug}.daily`] = j.items.map((it) => [wikiTs(it.timestamp), it.views]);
+        } catch {}
+        await sleep(1200);
+      }
+      if (!Object.keys(out).length) throw new Error('no article answered');
+      return out;
+    },
+  },
+  {
     key: 'dol-claims',
     everyMinutes: 180,
+    replace: true,
     async run() {
       // US Department of Labor ETA-539: weekly initial unemployment claims by state (column c3). Summed across
       // states this is the national, NOT seasonally adjusted, initial-claims count. (FRED blocks cloud runners.)
@@ -496,7 +564,8 @@ const HISTORY = [
         if (d < '2026-01-01') continue;
         by.set(d, (by.get(d) || 0) + (+c[4] || 0));
       }
-      return { 'control.us.jobless_claims_nsa.weekly': [...by.entries()].map(([d, v]) => [Date.parse(d) / 1000, v]) };
+      // Stamp each week at its START (report date is the week-ending Saturday) so the week containing launch counts as "after".
+      return { 'control.us.jobless_claims_nsa.weekly': [...by.entries()].map(([d, v]) => [Date.parse(d) / 1000 - 6 * DAY, v]) };
     },
   },
 ];

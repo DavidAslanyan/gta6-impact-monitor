@@ -1,6 +1,6 @@
 import type { Region } from './config'
 
-export type Group = 'attention' | 'games' | 'productivity' | 'study' | 'commute' | 'markets' | 'crypto' | 'energy' | 'mobility' | 'radar' | 'status' | 'control'
+export type Group = 'attention' | 'games' | 'productivity' | 'study' | 'commute' | 'markets' | 'crypto' | 'energy' | 'mobility' | 'radar' | 'safety' | 'lifestyle' | 'status' | 'control'
 export type Fmt = 'int' | 'dec' | 'usd' | 'pct' | 'rank' | 'level' | 'mw' | 'temp'
 
 export interface Signal {
@@ -74,8 +74,8 @@ export const SIGNALS: Signal[] = [
   S({ id: 'live.wiki.edits_per_sec', label: 'Wikipedia edits per second', group: 'productivity', unit: 'edits/s', fmt: 'dec', region: 'americas', source: 'Wikimedia EventStreams', sourceUrl: 'https://stream.wikimedia.org/?doc', note: 'All edits across Wikimedia, sampled for 20 seconds every 5 minutes.' }),
   S({ id: 'live.wiki.human_edits_per_sec', label: 'Human (non-bot) Wikipedia edits per second', group: 'productivity', unit: 'edits/s', fmt: 'dec', region: 'americas', source: 'Wikimedia EventStreams', sourceUrl: 'https://stream.wikimedia.org/?doc', note: 'Edits not flagged as bots.' }),
   S({ id: 'live.bluesky.posts_per_sec', label: 'Bluesky posts per second (all topics)', group: 'productivity', unit: 'posts/s', fmt: 'dec', region: 'americas', source: 'Bluesky Jetstream', sourceUrl: 'https://docs.bsky.app/blog/jetstream', note: 'Global posting rate on Bluesky.' }),
-  S({ id: 'appstore.us.doordash.rank', label: 'DoorDash — US App Store rank', group: 'productivity', unit: 'rank', fmt: 'rank', region: 'americas', source: 'Apple iTunes RSS', sourceUrl: 'https://rss.marketingtools.apple.com/', note: 'Food delivery: people staying in.', inverted: true }),
-  S({ id: 'appstore.us.ubereats.rank', label: 'Uber Eats — US App Store rank', group: 'productivity', unit: 'rank', fmt: 'rank', region: 'americas', source: 'Apple iTunes RSS', sourceUrl: 'https://rss.marketingtools.apple.com/', note: 'Food delivery: people staying in.', inverted: true }),
+  S({ id: 'appstore.us.doordash.rank', label: 'DoorDash — US App Store rank', group: 'lifestyle', unit: 'rank', fmt: 'rank', region: 'americas', source: 'Apple iTunes RSS', sourceUrl: 'https://rss.marketingtools.apple.com/', note: 'Food delivery: people staying in.', inverted: true }),
+  S({ id: 'appstore.us.ubereats.rank', label: 'Uber Eats — US App Store rank', group: 'lifestyle', unit: 'rank', fmt: 'rank', region: 'americas', source: 'Apple iTunes RSS', sourceUrl: 'https://rss.marketingtools.apple.com/', note: 'Food delivery: people staying in.', inverted: true }),
   S({ id: 'appstore.us.discord.rank', label: 'Discord — US App Store rank', group: 'productivity', unit: 'rank', fmt: 'rank', region: 'americas', source: 'Apple iTunes RSS', sourceUrl: 'https://rss.marketingtools.apple.com/', note: 'Gamers coordinating.', inverted: true }),
 
   // ── Markets
@@ -148,6 +148,22 @@ export const SIGNALS: Signal[] = [
   S({ id: 'crypto.btc.fee_fastest_sat_vb', label: 'Bitcoin next-block fee', group: 'crypto', unit: 'sat/vB', fmt: 'dec', region: 'americas', source: 'mempool.space', sourceUrl: 'https://mempool.space/', note: 'Recommended fee for next-block confirmation.' }),
   S({ id: 'crypto.usdt.supply_usd', label: 'Tether (USDT) supply', group: 'crypto', unit: 'USD', fmt: 'usd', region: 'americas', source: 'Tether transparency', sourceUrl: 'https://tether.to/en/transparency/', note: 'Total USDT issued across all chains — new minting shows up as a step.' }),
 
+  // ── Life at home
+  S({ id: 'lifestyle.netflix.top10_hours.weekly', label: 'Netflix: hours watched of its global Top 10s', group: 'lifestyle', unit: 'hours/week', fmt: 'int', region: 'americas', source: 'Netflix Top 10 (Tudum)', sourceUrl: 'https://www.netflix.com/tudum/top10', note: 'Total hours viewed of the 40 titles in Netflix\'s weekly global Top 10 lists (films and TV, English and non-English). Weeks run Monday–Sunday; published the following Tuesday.', featured: true }),
+  S({ id: 'lifestyle.wiki.insomnia.daily', label: 'Readers of “Insomnia” on Wikipedia', group: 'lifestyle', unit: 'readers/day', fmt: 'int', region: 'americas', source: 'Wikimedia Pageviews API', sourceUrl: 'https://pageviews.wmcloud.org/', note: 'English-Wikipedia readers per day. Up all night?', featured: true }),
+  S({ id: 'lifestyle.wiki.sleep_deprivation.daily', label: 'Readers of “Sleep deprivation”', group: 'lifestyle', unit: 'readers/day', fmt: 'int', region: 'americas', source: 'Wikimedia Pageviews API', sourceUrl: 'https://pageviews.wmcloud.org/', note: 'English-Wikipedia readers per day.' }),
+  S({ id: 'lifestyle.wiki.back_pain.daily', label: 'Readers of “Low back pain”', group: 'lifestyle', unit: 'readers/day', fmt: 'int', region: 'americas', source: 'Wikimedia Pageviews API', sourceUrl: 'https://pageviews.wmcloud.org/', note: 'English-Wikipedia readers per day. Long sessions, bad chairs.' }),
+  S({ id: 'lifestyle.wiki.eye_strain.daily', label: 'Readers of “Computer vision syndrome” (eye strain)', group: 'lifestyle', unit: 'readers/day', fmt: 'int', region: 'americas', source: 'Wikimedia Pageviews API', sourceUrl: 'https://pageviews.wmcloud.org/', note: 'English-Wikipedia readers per day.' }),
+  S({ id: 'lifestyle.wiki.pizza.daily', label: 'Readers of “Pizza”', group: 'lifestyle', unit: 'readers/day', fmt: 'int', region: 'americas', source: 'Wikimedia Pageviews API', sourceUrl: 'https://pageviews.wmcloud.org/', note: 'English-Wikipedia readers per day. The snack economy, measured the only free way we can.' }),
+  S({ id: 'lifestyle.wiki.energy_drink.daily', label: 'Readers of “Energy drink”', group: 'lifestyle', unit: 'readers/day', fmt: 'int', region: 'americas', source: 'Wikimedia Pageviews API', sourceUrl: 'https://pageviews.wmcloud.org/', note: 'English-Wikipedia readers per day.' }),
+  S({ id: 'lifestyle.wiki.miami.daily', label: 'Readers of “Miami”', group: 'lifestyle', unit: 'readers/day', fmt: 'int', region: 'americas', source: 'Wikimedia Pageviews API', sourceUrl: 'https://pageviews.wmcloud.org/', note: 'English-Wikipedia readers per day. GTA VI is set in a Miami-inspired Vice City.' }),
+
+  // ── Crime & disorder (settled days only)
+  S({ id: 'safety.sf.police_incidents.daily', label: 'San Francisco police incident reports', group: 'safety', unit: 'reports/day', fmt: 'int', region: 'americas', source: 'DataSF — Police Department Incident Reports', sourceUrl: 'https://data.sfgov.org/Public-Safety/Police-Department-Incident-Reports-2018-to-Present/wg3w-h783', note: 'Incidents by the day they happened. Reports keep arriving for days, so each day appears only once it has settled (5 days later).', featured: true }),
+  S({ id: 'safety.chicago.crimes.daily', label: 'Chicago reported crimes', group: 'safety', unit: 'crimes/day', fmt: 'int', region: 'americas', source: 'Chicago Data Portal — Crimes', sourceUrl: 'https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2', note: 'Crimes by the day they occurred. Chicago publishes with about a week of delay, so days appear 10 days later.', featured: true }),
+  S({ id: 'safety.seattle.offenses.daily', label: 'Seattle reported offenses', group: 'safety', unit: 'offenses/day', fmt: 'int', region: 'americas', source: 'Seattle Open Data — SPD Crime Data', sourceUrl: 'https://data.seattle.gov/Public-Safety/SPD-Crime-Data-2008-Present/tazs-3rd5', note: 'Offenses by the day they occurred; each day appears once settled (5 days later).' }),
+  S({ id: 'safety.nyc.noise_complaints.daily', label: 'New York 311 noise complaints', group: 'safety', unit: 'complaints/day', fmt: 'int', region: 'americas', source: 'NYC Open Data — 311 Service Requests', sourceUrl: 'https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9', note: 'Fewer parties — or louder living rooms? Each day appears once settled (3 days later).' }),
+
   // ── Under the radar
   S({ id: 'radar.ransomware_posts.daily', label: 'Ransomware leak-site victim posts per day', group: 'radar', unit: 'posts/day', fmt: 'int', region: 'americas', source: 'ransomware.live', sourceUrl: 'https://www.ransomware.live/', note: 'Organisations newly listed on ransomware groups\' leak sites, by discovery date. Counts only — no names are shown.', featured: true }),
   S({ id: 'radar.breaches_disclosed.daily', label: 'Data breaches added to Have I Been Pwned', group: 'radar', unit: 'breaches/day', fmt: 'int', region: 'americas', source: 'Have I Been Pwned', sourceUrl: 'https://haveibeenpwned.com/PwnedWebsites', note: 'Breaches loaded into HIBP each day (disclosure, not occurrence, date).' }),
@@ -185,17 +201,20 @@ export const TIER_LABEL = { official: 'official source', public: 'public dataset
 
 export const SIGNAL_BY_ID = Object.fromEntries(SIGNALS.map((s) => [s.id, s])) as Record<string, Signal>
 
-export const GROUPS: { key: Group; title: string; kicker: string; intro: string }[] = [
-  { key: 'attention', title: 'The Cause', kicker: '01 — Attention', intro: 'Direct measures of how much of the world is looking at GTA VI right now.' },
-  { key: 'games', title: 'Every Other Game', kicker: '02 — Gaming', intro: 'If everyone is in Leonida, who is left playing everything else? Concurrent players and viewers across PC, Roblox and streaming.' },
-  { key: 'productivity', title: 'Work & the Internet', kicker: '03 — Productivity', intro: 'Code commits, package downloads, reading and posting — the rhythm of a working world.' },
-  { key: 'study', title: 'School & Study', kicker: '04 — Education', intro: 'No one publishes live school attendance, so we watch what students leave behind: what they read, and the platform their coursework runs on.' },
-  { key: 'commute', title: 'Going to Work', kicker: '05 — Commuting', intro: 'Packed trains, parked cars, busy roads and full skies are what a normal working day looks like. Is it one?' },
-  { key: 'markets', title: 'Markets', kicker: '06 — Money', intro: 'The publisher, the platform makers, the competition for screen time, and the broader market.' },
-  { key: 'crypto', title: 'Crypto & On-chain', kicker: '07 — Crypto', intro: 'Prices, but also raw activity on the blockchains themselves — transactions, queues and new stablecoin supply.' },
-  { key: 'energy', title: 'The Grid', kicker: '08 — Energy', intro: 'If offices go quiet and living rooms light up, the grid should show it. National electricity demand, every 5–60 minutes.' },
-  { key: 'mobility', title: 'The Streets', kicker: '09 — Mobility', intro: 'Fewer commutes would mean bikes left in their docks, faster roads and quieter pavements. Do we see it?' },
-  { key: 'radar', title: 'While You Were Playing', kicker: '10 — Under the radar', intro: 'Some news is best released when nobody is watching. These are public records — breaches, ransomware claims, exploited vulnerabilities, government and company filings — counted per day against the four weeks before launch. Counts only; no names, no accusations.' },
-  { key: 'status', title: 'Under Load', kicker: '11 — Infrastructure', intro: 'Console networks and the services gamers lean on.' },
-  { key: 'control', title: 'Control Signals', kicker: '12 — Controls', intro: 'Things that should NOT move because of a video game. If these move too, be sceptical about everything above.' },
-]
+type GroupMeta = { key: Group; title: string; kicker: string; intro: string }
+export const GROUPS: GroupMeta[] = ([
+  { key: 'attention', title: 'The Cause', kicker: 'Attention', intro: 'Direct measures of how much of the world is looking at GTA VI right now.' },
+  { key: 'games', title: 'Every Other Game', kicker: 'Gaming', intro: 'If everyone is in Leonida, who is left playing everything else? Concurrent players and viewers across PC, Roblox and streaming.' },
+  { key: 'productivity', title: 'Work & the Internet', kicker: 'Productivity', intro: 'Code commits, package downloads, reading and posting — the rhythm of a working world.' },
+  { key: 'energy', title: 'The Grid', kicker: 'Energy', intro: 'If offices go quiet and living rooms light up, the grid should show it. National electricity demand, every 5–60 minutes.' },
+  { key: 'commute', title: 'Going to Work', kicker: 'Commuting', intro: 'Packed trains, parked cars, busy roads and full skies are what a normal working day looks like. Is it one?' },
+  { key: 'mobility', title: 'The Streets', kicker: 'Mobility', intro: 'Fewer commutes would mean bikes left in their docks, faster roads and quieter pavements. Do we see it?' },
+  { key: 'safety', title: 'Crime & Disorder', kicker: 'Public safety', intro: 'Is everyone too busy to cause trouble? Police reports and noise complaints from city open data. Reports trickle in for days, so a day is only shown once it has settled — post-launch days appear from around 21–28 November.' },
+  { key: 'lifestyle', title: 'Life at Home', kicker: 'Sleep, snacks & screens', intro: 'Streaming hours, food-delivery apps, and what people suddenly want to read about — insomnia, back pain, pizza. Reading interest is a real measurement of curiosity, not of behaviour; treat it as a clue.' },
+  { key: 'markets', title: 'Markets', kicker: 'Money', intro: 'The publisher, the platform makers, the competition for screen time, and the broader market.' },
+  { key: 'crypto', title: 'Crypto & On-chain', kicker: 'Crypto', intro: 'Prices, but also raw activity on the blockchains themselves — transactions, queues and new stablecoin supply.' },
+  { key: 'radar', title: 'While You Were Playing', kicker: 'Under the radar', intro: 'Some news is best released when nobody is watching. These are public records — breaches, ransomware claims, exploited vulnerabilities, government and company filings — counted per day against the four weeks before launch. Counts only; no names, no accusations.' },
+  { key: 'study', title: 'School & Study', kicker: 'Education', intro: 'No one publishes live school attendance, so we watch what students leave behind: what they read, and the platform their coursework runs on.' },
+  { key: 'status', title: 'Under Load', kicker: 'Infrastructure', intro: 'Console networks and the services gamers lean on.' },
+  { key: 'control', title: 'Control Signals', kicker: 'Controls', intro: 'Things that should NOT move because of a video game. If these move too, be sceptical about everything above.' },
+] as GroupMeta[]).map((g, i) => ({ ...g, kicker: `${String(i + 1).padStart(2, '0')} — ${g.kicker}` }))

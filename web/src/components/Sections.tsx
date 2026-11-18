@@ -1,9 +1,9 @@
 import { useMemo } from 'react'
 import { CALENDAR_EFFECTS, LAUNCH_MARKERS } from '../config'
-import { buildBaseline, findAnomalies, type Anomaly } from '../data/baseline'
-import { useData } from '../data/store'
+import { buildBaseline, deltaAt, findAnomalies, type Anomaly } from '../data/baseline'
+import { seriesFor, useData } from '../data/store'
 import { fmtPct, fmtUtc, fmtValue } from '../format'
-import { GROUPS, SIGNALS, type Group } from '../signals'
+import { GROUPS, SIGNALS, tierOf, type Group } from '../signals'
 import { GROUP_COLOR } from '../theme'
 import { SignalCard } from './SignalCard'
 
@@ -75,6 +75,56 @@ export function AnomalyFeed() {
           </li>
         ))}
       </ol>
+    </section>
+  )
+}
+
+/** Every Signal section, in the editorial order defined by GROUPS (most visual first). */
+export function AllSections() {
+  return <>{GROUPS.map((g) => <SignalSection key={g.key} group={g.key} />)}</>
+}
+
+/**
+ * The six Signals that have moved furthest from their Baseline right now, chosen automatically by robust z-score.
+ * Before enough post-launch data exists, it falls back to the strongest measured Cause Signals.
+ */
+export function BiggestMoves() {
+  const data = useData()
+  const picks = useMemo(() => {
+    const scored: { id: string; score: number }[] = []
+    for (const s of SIGNALS) {
+      if (['rank', 'level', 'temp'].includes(s.fmt) || s.group === 'control' || s.group === 'status' || tierOf(s) === 'unofficial' && s.group !== 'attention') continue
+      const h = data.hourly[s.id]
+      if (!h?.length) continue
+      const model = buildBaseline(s, h)
+      const pts = seriesFor(data, s.id)
+      const periodic = /\.(daily|weekly)$/.test(s.id)
+      const last = periodic ? pts[pts.length - 1] : data.latest[s.id] ?? pts[pts.length - 1]
+      if (!last || Date.now() / 1000 - last[0] > (periodic ? 3 * 86400 : 6 * 3600)) continue
+      const d = deltaAt(model, last[0], last[1])
+      if (!d || Math.abs(d.pct) < 3) continue
+      scored.push({ id: s.id, score: Math.abs(d.z) })
+    }
+    scored.sort((a, b) => b.score - a.score)
+    const ids = scored.slice(0, 6).map((x) => x.id)
+    for (const fallback of ['attention.wiki.gta6.all.daily', 'kick.gta6.viewers', 'steam.top100.players', 'dev.github.commits.hourly', 'energy.gb.demand_mw', 'commute.london.tube_crowding_pct']) {
+      if (ids.length >= 6) break
+      if (!ids.includes(fallback) && data.hourly[fallback]?.length) ids.push(fallback)
+    }
+    return { ids, automatic: scored.length }
+  }, [data])
+  const bySig = Object.fromEntries(SIGNALS.map((s) => [s.id, s]))
+  return (
+    <section className="section" id="moves">
+      <div className="section__head">
+        <div className="kicker">Right now</div>
+        <h2>Biggest moves</h2>
+        <p className="section__intro">
+          Chosen automatically, not by us: the Signals furthest from their Baseline at this moment, ranked by how unusual the
+          change is. {picks.automatic < 6 ? 'Until enough after-launch data exists, the strongest Cause Signals fill the remaining slots.' : ''}
+        </p>
+      </div>
+      <div className="grid grid--moves">{picks.ids.map((id) => <SignalCard key={id} signal={bySig[id]} />)}</div>
     </section>
   )
 }
