@@ -37,6 +37,19 @@ export function UnlockMap() {
       const geo = feature(topo, topo.objects.countries) as unknown as GeoJSON.FeatureCollection<GeoJSON.Geometry, { name: string }>
       // Drop shapes that straddle the antimeridian or carry no population (they draw stray lines across the map).
       geo.features = geo.features.filter((f) => !['Antarctica', 'Fiji', 'Fr. S. Antarctic Lands'].includes(f.properties.name))
+      // Outlines that cross the 180° meridian (Russia's Chukotka, Alaska's Aleutians) draw a band across the whole map.
+      // Fix each such ring by moving its stray points to the side of the antimeridian where most of the ring lies.
+      const fixRing = (ring: number[][]) => {
+        const lons = ring.map((p) => p[0])
+        if (Math.max(...lons) - Math.min(...lons) < 180) return ring
+        const east = lons.filter((x) => x > 0).length >= lons.length / 2
+        return ring.map(([x, y]) => [east ? (x < 0 ? 180 : x) : (x > 0 ? -180 : x), y])
+      }
+      for (const f of geo.features) {
+        const g = f.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon
+        if (g.type === 'Polygon') g.coordinates = g.coordinates.map(fixRing)
+        else if (g.type === 'MultiPolygon') g.coordinates = g.coordinates.map((poly) => poly.map(fixRing))
+      }
       const offs: Record<string, number> = {}
       for (const f of geo.features) {
         const name = f.properties.name
@@ -81,7 +94,7 @@ export function UnlockMap() {
         ],
       },
       series: [{
-        type: 'map', map: 'world', roam: false, data, layoutCenter: ['50%', '54%'], layoutSize: '118%',
+        type: 'map', map: 'world', roam: false, data, left: 8, right: 8, top: 56, bottom: 8,
         itemStyle: { borderColor: 'rgba(13,8,32,0.9)', borderWidth: 0.5, areaColor: '#2a1d4d' },
         emphasis: { label: { show: false }, itemStyle: { areaColor: C.teal } },
         select: { disabled: true },
