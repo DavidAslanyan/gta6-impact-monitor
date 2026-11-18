@@ -89,12 +89,12 @@ export function Footer() {
   return (
     <footer className="footer">
       <div>
-        <b>GTA VI Global Impact Monitor</b> is an independent, fan-made data project. It is not affiliated with, endorsed or sponsored by
-        Rockstar Games or Take-Two Interactive. Grand Theft Auto, the GTA VI logo and all game imagery are trademarks and copyrighted
-        material of Take-Two Interactive Software, Inc. and are used here, credited and unaltered, as published by Rockstar Games.
+        <b>GTA VI Global Impact Monitor</b> is an independent open-data research project. Grand Theft Auto and GTA VI are
+        trademarks of Take-Two Interactive Software, Inc. This project is not affiliated with or endorsed by Take-Two Interactive
+        or Rockstar Games. Game artwork is official pre-launch media published by Rockstar Games, shown credited and unaltered.
       </div>
       <div className="footer__meta">
-        Data from public APIs listed above, each under its own terms. Correlation is not causation. ·{' '}
+        All data comes from the public sources listed above, each under its own terms, and every series can be downloaded. Correlation is not causation. ·{' '}
         <a href={REPO_URL} target="_blank" rel="noreferrer">Source code & raw data</a>
       </div>
     </footer>

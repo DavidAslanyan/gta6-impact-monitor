@@ -3,9 +3,21 @@ import { CALENDAR_EFFECTS, LAUNCH_MARKERS, REGION_LABEL, REGION_LAUNCH } from '.
 import { buildBaseline, deltaAt, MODE_LABEL } from '../data/baseline'
 import { seriesFor, useData, type Point } from '../data/store'
 import { fmtAgo, fmtPct, fmtUtc, fmtValue } from '../format'
-import type { Signal } from '../signals'
+import { tierOf, TIER_LABEL, type Signal } from '../signals'
+import { REPO_URL } from '../config'
 import { axisCommon, C, GROUP_COLOR, RANGE_SECONDS, tooltipCommon, useRange } from '../theme'
 import { EChart } from './EChart'
+
+function downloadCsv(signal: Signal, pts: Point[]) {
+  const rows = ['timestamp_utc,unix_seconds,value', ...pts.map(([t, v]) => `${new Date(t * 1000).toISOString()},${t},${v}`)]
+  const meta = `# ${signal.label} (${signal.unit}) — source: ${signal.source} ${signal.sourceUrl}\n# Collected by the GTA VI Global Impact Monitor: ${REPO_URL}\n# Hourly averages, plus 5-minute readings for the last 48 hours where available. Full-resolution raw data: ${REPO_URL}/tree/data/series/${signal.id}\n`
+  const blob = new Blob([meta + rows.join('\n') + '\n'], { type: 'text/csv' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = `${signal.id}.csv`
+  a.click()
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+}
 
 export function SignalCard({ signal, big = false }: { signal: Signal; big?: boolean }) {
   const data = useData()
@@ -75,7 +87,7 @@ export function SignalCard({ signal, big = false }: { signal: Signal; big?: bool
         { name: 'band', type: 'line', data: width, stack: 'band', symbol: 'none', lineStyle: { opacity: 0 }, areaStyle: { color: 'rgba(255,255,255,0.07)' }, silent: true, tooltip: { show: false } },
         { name: 'expected', type: 'line', data: mid, symbol: 'none', lineStyle: { color: 'rgba(255,255,255,0.45)', width: 1, type: 'dashed' }, z: 2 },
         {
-          name: 'value', type: 'line', data: main, symbol: 'none', smooth: 0.15, z: 3,
+          name: 'value', type: 'line', data: main, symbol: periodic ? 'circle' : 'none', symbolSize: 4, smooth: periodic ? false : 0.15, z: 3,
           lineStyle: { color, width: 2, shadowColor: color, shadowBlur: 8 },
           areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: color + '55' }, { offset: 1, color: color + '00' }] }, origin: inv ? 'end' : 'auto' },
           markLine: {
@@ -104,7 +116,7 @@ export function SignalCard({ signal, big = false }: { signal: Signal; big?: bool
         <div className="card__title">
           <h3>{signal.label}</h3>
           <div className="card__badges">
-            {signal.unofficial && <span className="badge badge--warn" title="Undocumented source: may change or break without notice">unofficial source</span>}
+            <span className={`badge badge--tier-${tierOf(signal)}`} title={tierOf(signal) === 'official' ? 'Published by the operator, agency or company itself' : tierOf(signal) === 'public' ? 'Documented public dataset from a third-party aggregator' : 'Undocumented endpoint: real data, but it may change or break without notice'}>{TIER_LABEL[tierOf(signal)]}</span>
             {signal.group === 'control' && <span className="badge">control</span>}
             <span className="badge badge--dim" title={`Baseline ends at the ${REGION_LABEL[signal.region]} Launch Moment`}>{signal.region === 'oceania' ? 'NZ/AU clock' : signal.region === 'europe' ? 'EU clock' : 'US clock'}</span>
           </div>
@@ -139,7 +151,12 @@ export function SignalCard({ signal, big = false }: { signal: Signal; big?: bool
             <>First post-launch {signal.id.endsWith('.weekly') ? 'week' : 'day'} not complete yet · </>
           ) : null}
           {latest ? <span className={stale ? 'stale' : ''}>updated {fmtAgo(latest[0])}</span> : null} ·{' '}
-          <a href={signal.sourceUrl} target="_blank" rel="noreferrer">{signal.source}</a>
+          {signal.source}
+        </span>
+        <span className="card__links">
+          <a href={signal.sourceUrl} target="_blank" rel="noreferrer">Verify at source ↗</a>
+          <button onClick={() => downloadCsv(signal, pts)}>Download CSV</button>
+          <a href={`${REPO_URL}/tree/data/series/${signal.id}`} target="_blank" rel="noreferrer">Raw data ↗</a>
         </span>
       </footer>
     </article>

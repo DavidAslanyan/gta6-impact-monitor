@@ -11,10 +11,18 @@ export const UA = {
   Accept: 'application/json,text/csv,*/*',
 };
 
-export async function getText(url, { headers = {}, timeoutMs = 25000 } = {}) {
-  const res = await fetch(url, { headers: { ...UA, ...headers }, signal: AbortSignal.timeout(timeoutMs) });
-  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
-  return res.text();
+export async function getText(url, { headers = {}, timeoutMs = 25000, retries = 2 } = {}) {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, { headers: { ...UA, ...headers }, signal: AbortSignal.timeout(timeoutMs) });
+    if (res.ok) return res.text();
+    // Rate-limited or a transient server error: back off and retry a couple of times.
+    if ((res.status === 429 || res.status >= 500) && attempt < retries) {
+      const wait = Number(res.headers.get('retry-after')) * 1000 || 2000 * 2 ** attempt;
+      await new Promise((r) => setTimeout(r, Math.min(wait, 15000)));
+      continue;
+    }
+    throw new Error(`HTTP ${res.status} for ${url}`);
+  }
 }
 
 export async function getJson(url, opts) {

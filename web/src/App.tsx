@@ -13,9 +13,10 @@ import { DEFAULT_PARAMS, type LossParams } from './model/loss'
 import { RangeContext, type Range } from './theme'
 
 const NAV = [
-  ['pulse', 'Live'], ['timeline', 'Timeline'], ['wave', 'Unlock wave'], ['loss', 'Loss'], ['attention', 'Cause'],
-  ['games', 'Games'], ['productivity', 'Work'], ['markets', 'Markets'], ['energy', 'Grid'], ['mobility', 'Streets'],
-  ['status', 'Load'], ['control', 'Controls'], ['method', 'Method'],
+  ['pulse', 'Live'], ['timeline', 'Timeline'], ['wave', 'Unlock wave'], ['attention', 'Cause'], ['games', 'Games'],
+  ['productivity', 'Work'], ['study', 'School'], ['commute', 'Commute'], ['markets', 'Markets'], ['crypto', 'Crypto'],
+  ['energy', 'Grid'], ['mobility', 'Streets'], ['radar', 'Radar'], ['status', 'Load'], ['control', 'Controls'],
+  ['loss', 'Scenario'], ['method', 'Method'],
 ] as const
 
 function readParams(): LossParams {
@@ -31,7 +32,7 @@ export default function App() {
   return (
     <RangeContext.Provider value={{ range, setRange }}>
       <Ticker />
-      <Hero lossParams={lossParams} />
+      <Hero />
       <nav className="nav">
         <div className="nav__inner">
           <a href="#top" className="nav__brand"><img src="media/logo-vi.png" alt="" /> Impact Monitor</a>
@@ -50,15 +51,19 @@ export default function App() {
         <LivePulse />
         <AnomalyFeed />
         <UnlockMap />
-        <LossModel params={lossParams} setParams={setLossParams} />
         <SignalSection group="attention" />
         <SignalSection group="games" />
         <SignalSection group="productivity" />
+        <SignalSection group="study" />
+        <SignalSection group="commute" />
         <SignalSection group="markets" />
+        <SignalSection group="crypto" />
         <SignalSection group="energy" />
         <SignalSection group="mobility" />
+        <SignalSection group="radar" />
         <SignalSection group="status" />
         <SignalSection group="control" />
+        <LossModel params={lossParams} setParams={setLossParams} />
         <Trailers />
         <Methodology />
       </main>

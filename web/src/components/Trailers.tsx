@@ -5,8 +5,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 // We drive the player through the IFrame API: on pause we cover the player with our own overlay, and when the
 // video ends we swap the player back to our poster, so YouTube's suggestion screens are never visible.
 const TRAILERS = [
-  { id: 'QdBZY2fkU-0', title: 'Trailer 1', date: 'December 2023', poster: 'media/beach-bridge-skyline-daytime.jpg' },
-  { id: 'VQRLujxTm3c', title: 'Trailer 2', date: 'May 2025', poster: 'media/city-harbor-skyline-dusk.jpg' },
+  { id: 'QdBZY2fkU-0', title: 'Trailer 1', date: 'December 2023', poster: 'media/beach-bridge-skyline-daytime-900.jpg' },
+  { id: 'VQRLujxTm3c', title: 'Trailer 2', date: 'May 2025', poster: 'media/city-harbor-skyline-dusk-900.jpg' },
 ]
 
 interface YTPlayer { playVideo(): void; destroy(): void }

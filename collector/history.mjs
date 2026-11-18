@@ -78,6 +78,7 @@ const HISTORY = [
   },
   {
     key: 'wikipedia',
+    everyMinutes: 30,
     async run(backfill) {
       const out = {};
       const start = new Date((now - (backfill ? 40 : 4) * DAY) * 1000);
@@ -218,6 +219,7 @@ const HISTORY = [
   },
   {
     key: 'grid-nz',
+    everyMinutes: 60,
     async run() {
       const j = await getJson('https://api.em6.co.nz/ords/em6/data_api/free/price?');
       const pts = [];
@@ -248,6 +250,7 @@ const HISTORY = [
   },
   {
     key: 'cloudflare-radar',
+    everyMinutes: 30,
     replace: true,
     async run() {
       const token = process.env.CLOUDFLARE_API_TOKEN;
@@ -296,6 +299,7 @@ const HISTORY = [
   },
   {
     key: 'npm',
+    everyMinutes: 60,
     async run(backfill) {
       const from = ymd(new Date((now - (backfill ? 40 : 5) * DAY) * 1000));
       const j = await getJson(`https://api.npmjs.org/downloads/range/${from}:${ymd(new Date(now * 1000))}`);
@@ -320,7 +324,165 @@ const HISTORY = [
     },
   },
   {
+    key: 'onchain-daily',
+    everyMinutes: 30,
+    async run(backfill) {
+      const out = {};
+      const b = await getJson(`https://api.blockchain.info/charts/n-transactions?timespan=${backfill ? '60days' : '7days'}&format=json&sampled=false`);
+      out['crypto.btc.onchain_tx.daily'] = b.values.map((v) => [v.x, v.y]);
+      const e = await getJson('https://eth.blockscout.com/api/v2/stats/charts/transactions');
+      out['crypto.eth.onchain_tx.daily'] = e.chart_data.map((d) => [Date.parse(d.date) / 1000, +d.transactions_count]);
+      return out;
+    },
+  },
+  {
+    key: 'federal-register',
+    everyMinutes: 60,
+    async run(backfill) {
+      const pts = [];
+      for (let d = backfill ? 35 : 3; d >= 1; d--) {
+        const day = ymd(new Date((now - d * DAY) * 1000));
+        const j = await getJson(`https://www.federalregister.gov/api/v1/documents.json?conditions[publication_date][is]=${day}&per_page=1`);
+        const wd = new Date(day).getUTCDay();
+        if (wd !== 0 && wd !== 6) pts.push([Date.parse(day) / 1000, j.count]); // published on federal workdays only
+        await sleep(300);
+      }
+      return { 'radar.us.federal_register_docs.daily': pts };
+    },
+  },
+  {
+    key: 'nvd-cves',
+    everyMinutes: 60,
+    async run(backfill) {
+      const pts = [];
+      for (let d = backfill ? 35 : 3; d >= 1; d--) {
+        const day = ymd(new Date((now - d * DAY) * 1000));
+        try {
+          const j = await getJson(`https://services.nvd.nist.gov/rest/json/cves/2.0?pubStartDate=${day}T00:00:00.000&pubEndDate=${day}T23:59:59.999&resultsPerPage=1`, { timeoutMs: 40000 });
+          pts.push([Date.parse(day) / 1000, j.totalResults]);
+        } catch {}
+        await sleep(6500); // NVD allows 5 requests / 30 s without a key
+      }
+      if (!pts.length) throw new Error('NVD unavailable');
+      return { 'radar.cves_published.daily': pts };
+    },
+  },
+  {
+    key: 'cisa-kev',
+    everyMinutes: 60,
+    async run() {
+      const j = await getJson('https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json', { timeoutMs: 60000 });
+      const by = new Map();
+      for (const v of j.vulnerabilities) by.set(v.dateAdded, (by.get(v.dateAdded) || 0) + 1);
+      const from = now - 60 * DAY;
+      const pts = [];
+      for (let t = Math.floor(from / DAY) * DAY; t < now - DAY; t += DAY) pts.push([t, by.get(ymd(new Date(t * 1000))) || 0]);
+      return { 'radar.cisa_kev_added.daily': pts };
+    },
+  },
+  {
+    key: 'hibp-breaches',
+    everyMinutes: 60,
+    async run() {
+      const j = await getJson('https://haveibeenpwned.com/api/v3/breaches', { timeoutMs: 60000 });
+      const n = new Map(), acc = new Map();
+      for (const b of j) {
+        const d = b.AddedDate.slice(0, 10);
+        n.set(d, (n.get(d) || 0) + 1);
+        acc.set(d, (acc.get(d) || 0) + (b.PwnCount || 0));
+      }
+      const pts = [], pts2 = [];
+      for (let t = Math.floor((now - 60 * DAY) / DAY) * DAY; t < now - DAY; t += DAY) {
+        const d = ymd(new Date(t * 1000));
+        pts.push([t, n.get(d) || 0]);
+        pts2.push([t, acc.get(d) || 0]);
+      }
+      return { 'radar.breaches_disclosed.daily': pts, 'radar.breached_accounts.daily': pts2 };
+    },
+  },
+  {
+    key: 'ransomware-posts',
+    everyMinutes: 30,
+    async run(backfill) {
+      const months = new Set([ymd(new Date(now * 1000)).slice(0, 7)]);
+      if (backfill) months.add(ymd(new Date((now - 35 * DAY) * 1000)).slice(0, 7));
+      const by = new Map();
+      for (const m of months) {
+        const [y, mo] = m.split('-');
+        const j = await getJson(`https://api.ransomware.live/v2/victims/${y}/${mo}`, { timeoutMs: 60000 });
+        for (const v of j) {
+          const d = String(v.discovered || '').slice(0, 10);
+          if (d) by.set(d, (by.get(d) || 0) + 1);
+        }
+        await sleep(1000);
+      }
+      const pts = [];
+      for (let t = Math.floor((now - (backfill ? 35 : 5) * DAY) / DAY) * DAY; t < now - DAY; t += DAY) pts.push([t, by.get(ymd(new Date(t * 1000))) || 0]);
+      return { 'radar.ransomware_posts.daily': pts };
+    },
+  },
+  {
+    key: 'earthquakes',
+    everyMinutes: 60,
+    async run(backfill) {
+      const pts = [];
+      for (let d = backfill ? 35 : 3; d >= 1; d--) {
+        const a = ymd(new Date((now - d * DAY) * 1000));
+        const b = ymd(new Date((now - (d - 1) * DAY) * 1000));
+        const j = await getJson(`https://earthquake.usgs.gov/fdsnws/event/1/count?starttime=${a}&endtime=${b}&minmagnitude=2.5&format=geojson`);
+        pts.push([Date.parse(a) / 1000, j.count]);
+        await sleep(200);
+      }
+      return { 'control.earthquakes_m25.daily': pts };
+    },
+  },
+  {
+    key: 'homework-index',
+    everyMinutes: 60,
+    async run(backfill) {
+      // A fixed basket of classic school-curriculum articles on English Wikipedia: a proxy for students studying.
+      const basket = ['Photosynthesis', 'Pythagorean_theorem', 'Mitosis', 'World_War_II', 'French_Revolution', 'Periodic_table',
+        'Quadratic_equation', 'William_Shakespeare', 'Cell_(biology)', 'Industrial_Revolution', 'Romeo_and_Juliet', 'Cold_War',
+        'Algebra', 'Newton%27s_laws_of_motion', 'Water_cycle', 'Roman_Empire'];
+      const start = ymdCompact(new Date((now - (backfill ? 40 : 4) * DAY) * 1000));
+      const end = ymdCompact(new Date(now * 1000));
+      const total = new Map();
+      let ok = 0;
+      for (const a of basket) {
+        try {
+          const j = await getJson(`https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/${a}/daily/${start}00/${end}00`, { headers: WIKI_UA });
+          for (const it of j.items) total.set(wikiTs(it.timestamp), (total.get(wikiTs(it.timestamp)) || 0) + it.views);
+          ok++;
+        } catch {}
+        await sleep(400);
+      }
+      if (ok !== basket.length) throw new Error(`homework basket incomplete (${ok}/${basket.length})`);
+      return { 'study.homework_index.daily': [...total.entries()] };
+    },
+  },
+  {
+    key: 'sec-filings',
+    everyMinutes: 60,
+    async run(backfill) {
+      // SEC requires a declared contact in the User-Agent; only runs when the owner configures SEC_CONTACT.
+      const contact = process.env.SEC_CONTACT;
+      if (!contact) return null;
+      const out = { 'radar.sec_8k.daily': [], 'radar.sec_form4.daily': [] };
+      for (let d = backfill ? 35 : 3; d >= 1; d--) {
+        const day = ymd(new Date((now - d * DAY) * 1000));
+        for (const [form, id] of [['8-K', 'radar.sec_8k.daily'], ['4', 'radar.sec_form4.daily']]) {
+          const j = await getJson(`https://efts.sec.gov/LATEST/search-index?forms=${form}&dateRange=custom&startdt=${day}&enddt=${day}`, { headers: { 'User-Agent': `gta6-impact-monitor ${contact}` } });
+          const n = j.hits?.total?.value;
+          if (Number.isFinite(n)) out[id].push([Date.parse(day) / 1000, n]);
+          await sleep(250);
+        }
+      }
+      return out;
+    },
+  },
+  {
     key: 'fred',
+    everyMinutes: 180,
     async run() {
       const csv = await getText('https://fred.stlouisfed.org/graph/fredgraph.csv?id=ICSA&cosd=2026-01-01', { timeoutMs: 120000 });
       const pts = csv.split('\n').slice(1).filter(Boolean).map((l) => {
@@ -344,7 +506,9 @@ function ptOffsetHours(date) {
   return t >= nth(2, 2) && t < nth(10, 1) ? 7 : 8;
 }
 
-const chosen = HISTORY.filter((s) => !only.length || only.includes(s.key));
+// Slow-moving or rate-limited sources declare everyMinutes; skip them until they are due (unless named explicitly).
+const due = (s) => only.length || !s.everyMinutes || !state[s.key]?.lastRun || now - state[s.key].lastRun >= s.everyMinutes * 60 - 30;
+const chosen = HISTORY.filter((s) => (!only.length || only.includes(s.key)) && due(s));
 const health = await readJson(join(DATA, 'health.json'), {});
 const latest = await readJson(join(DATA, 'latest.json'), {});
 

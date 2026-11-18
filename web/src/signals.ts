@@ -1,6 +1,6 @@
 import type { Region } from './config'
 
-export type Group = 'attention' | 'games' | 'productivity' | 'markets' | 'energy' | 'mobility' | 'status' | 'control'
+export type Group = 'attention' | 'games' | 'productivity' | 'study' | 'commute' | 'markets' | 'crypto' | 'energy' | 'mobility' | 'radar' | 'status' | 'control'
 export type Fmt = 'int' | 'dec' | 'usd' | 'pct' | 'rank' | 'level' | 'mw' | 'temp'
 
 export interface Signal {
@@ -17,6 +17,8 @@ export interface Signal {
   featured?: boolean
   /** Rank-like signals: a smaller number is "more". */
   inverted?: boolean
+  /** official = published by the operator/agency itself; public = documented public API; unofficial = undocumented endpoint. */
+  tier?: 'official' | 'public' | 'unofficial'
 }
 
 const S = (s: Signal) => s
@@ -98,9 +100,9 @@ export const SIGNALS: Signal[] = [
   S({ id: 'mkt.crude.price', label: 'Crude oil (WTI front month)', group: 'markets', unit: 'USD/bbl', fmt: 'usd', region: 'americas', ...CNBC, note: 'Fewer commutes, less fuel.' }),
   S({ id: 'mkt.gold.price', label: 'Gold (front month)', group: 'markets', unit: 'USD/oz', fmt: 'usd', region: 'americas', ...CNBC, note: 'Safe-haven demand.' }),
   S({ id: 'mkt.nzdusd.price', label: 'NZD / USD', group: 'markets', unit: 'USD', fmt: 'dec', region: 'oceania', ...CNBC, note: 'The first currency to open after an unlock.' }),
-  S({ id: 'crypto.btc.price', label: 'Bitcoin (BTC/USDT)', group: 'markets', unit: 'USD', fmt: 'usd', region: 'americas', source: 'Binance market data', sourceUrl: 'https://developers.binance.com/docs/binance-spot-api-docs/rest-api', note: 'Hourly close.' }),
-  S({ id: 'crypto.btc.trades_per_hour', label: 'Bitcoin trades per hour (Binance)', group: 'markets', unit: 'trades/h', fmt: 'int', region: 'americas', source: 'Binance market data', sourceUrl: 'https://developers.binance.com/docs/binance-spot-api-docs/rest-api', note: 'Number of BTC/USDT trades each hour — retail traders busy elsewhere trade less.', featured: true }),
-  S({ id: 'crypto.fear_greed', label: 'Crypto Fear & Greed Index', group: 'markets', unit: '0–100', fmt: 'int', region: 'americas', source: 'Alternative.me', sourceUrl: 'https://alternative.me/crypto/fear-and-greed-index/', note: 'Daily sentiment index.' }),
+  S({ id: 'crypto.btc.price', label: 'Bitcoin (BTC/USDT)', group: 'crypto', unit: 'USD', fmt: 'usd', region: 'americas', source: 'Binance market data', sourceUrl: 'https://developers.binance.com/docs/binance-spot-api-docs/rest-api', note: 'Hourly close.' }),
+  S({ id: 'crypto.btc.trades_per_hour', label: 'Bitcoin trades per hour (Binance)', group: 'crypto', unit: 'trades/h', fmt: 'int', region: 'americas', source: 'Binance market data', sourceUrl: 'https://developers.binance.com/docs/binance-spot-api-docs/rest-api', note: 'Number of BTC/USDT trades each hour — retail traders busy elsewhere trade less.', featured: true }),
+  S({ id: 'crypto.fear_greed', label: 'Crypto Fear & Greed Index', group: 'crypto', unit: '0–100', fmt: 'int', region: 'americas', source: 'Alternative.me', sourceUrl: 'https://alternative.me/crypto/fear-and-greed-index/', note: 'Daily sentiment index.' }),
 
   // ── Energy
   S({ id: 'energy.gb.demand_mw', label: 'Great Britain electricity demand', group: 'energy', unit: 'MW', fmt: 'mw', region: 'europe', source: 'Elexon BMRS', sourceUrl: 'https://bmrs.elexon.co.uk/', note: '5-minute national demand outturn. If people stay home, demand can shift from offices to living rooms.', featured: true }),
@@ -122,6 +124,40 @@ export const SIGNALS: Signal[] = [
   S({ id: 'traffic.nyc.speed_mph', label: 'New York average road speed', group: 'mobility', unit: 'mph', fmt: 'dec', region: 'americas', source: 'NYC DOT real-time speeds', sourceUrl: 'https://data.cityofnewyork.us/Transportation/DOT-Traffic-Speeds-NBE/i4gi-tjb9', note: 'Mean speed over the latest sensor readings. Emptier roads tend to move faster.', featured: true }),
   S({ id: 'footfall.melbourne.per_min', label: 'Melbourne CBD pedestrians per minute', group: 'mobility', unit: 'people/min', fmt: 'dec', region: 'oceania', source: 'City of Melbourne', sourceUrl: 'https://data.melbourne.vic.gov.au/', note: 'Footfall sensors across the city centre.', featured: true }),
 
+  // ── School & study
+  S({ id: 'study.homework_index.daily', label: 'Homework index — school-topic reading on Wikipedia', group: 'study', unit: 'views/day', fmt: 'int', region: 'americas', ...WIKI, note: 'Daily English-Wikipedia views of 16 classic curriculum articles (photosynthesis, the Pythagorean theorem, the French Revolution…). A proxy for students studying.', featured: true }),
+  S({ id: 'status.canvas.level', label: 'Canvas (school & university LMS) status', group: 'study', unit: 'level', fmt: 'level', region: 'americas', source: 'Instructure status page', sourceUrl: 'https://status.instructure.com/', note: 'Canvas runs coursework for thousands of schools and universities. 0 = operational … 3 = critical.' }),
+
+  // ── Going to work
+  S({ id: 'commute.london.tube_crowding_pct', label: 'London Underground crowding at six central stations', group: 'commute', unit: '% of TfL typical', fmt: 'dec', region: 'europe', source: 'TfL Unified API — Crowding', sourceUrl: 'https://api-portal.tfl.gov.uk/', note: 'TfL\'s live crowding at Bank, Oxford Circus, King\'s Cross, Liverpool Street, Canary Wharf and Waterloo, as a percentage of TfL\'s own typical level.', featured: true }),
+  S({ id: 'commute.melbourne.parking_occupied_pct', label: 'Melbourne CBD on-street parking occupied', group: 'commute', unit: '% of bays', fmt: 'pct', region: 'oceania', source: 'City of Melbourne parking sensors', sourceUrl: 'https://data.melbourne.vic.gov.au/explore/dataset/on-street-parking-bay-sensors/', note: 'Share of ~6,000 sensor-equipped bays with a car in them right now.', featured: true }),
+  S({ id: 'traffic.madrid.vehicles_per_hour', label: 'Madrid road traffic (sum of ~4,900 sensors)', group: 'commute', unit: 'vehicles/h', fmt: 'int', region: 'europe', source: 'Ayuntamiento de Madrid — Informo', sourceUrl: 'https://informo.madrid.es/', note: 'Total hourly vehicle intensity reported by the city\'s traffic measuring points.' }),
+  S({ id: 'traffic.hongkong.speed_kmh', label: 'Hong Kong strategic-road average speed', group: 'commute', unit: 'km/h', fmt: 'dec', region: 'oceania', source: 'HK Transport Department', sourceUrl: 'https://data.gov.hk/en-data/dataset/hk-td-sm_4-traffic-data-strategic-major-roads', note: 'Mean lane speed across valid detectors on major roads. Emptier roads tend to move faster.' }),
+  S({ id: 'traffic.hongkong.volume', label: 'Hong Kong strategic-road vehicle count', group: 'commute', unit: 'vehicles/interval', fmt: 'int', region: 'oceania', source: 'HK Transport Department', sourceUrl: 'https://data.gov.hk/en-data/dataset/hk-td-sm_4-traffic-data-strategic-major-roads', note: 'Vehicles counted by valid detectors in the latest 30-second interval.' }),
+  S({ id: 'air.global.aircraft_airborne', label: 'Aircraft airborne worldwide', group: 'commute', unit: 'aircraft', fmt: 'int', region: 'americas', source: 'OpenSky Network', sourceUrl: 'https://opensky-network.org/', note: 'Transponder-equipped aircraft in the air right now (sampled every 20 minutes). Business travel shows up here.', featured: true }),
+  S({ id: 'air.nyc.aircraft', label: 'Aircraft within 150 nm of New York (JFK)', group: 'commute', unit: 'aircraft', fmt: 'int', region: 'americas', source: 'adsb.lol', sourceUrl: 'https://adsb.lol/', note: 'Airborne aircraft around the New York area.' }),
+  S({ id: 'air.london.aircraft', label: 'Aircraft within 150 nm of London (LHR)', group: 'commute', unit: 'aircraft', fmt: 'int', region: 'europe', source: 'adsb.lol', sourceUrl: 'https://adsb.lol/', note: 'Airborne aircraft around London.' }),
+  S({ id: 'air.frankfurt.aircraft', label: 'Aircraft within 150 nm of Frankfurt (FRA)', group: 'commute', unit: 'aircraft', fmt: 'int', region: 'europe', source: 'adsb.lol', sourceUrl: 'https://adsb.lol/', note: 'Airborne aircraft around Frankfurt.' }),
+  S({ id: 'air.tokyo.aircraft', label: 'Aircraft within 150 nm of Tokyo (HND)', group: 'commute', unit: 'aircraft', fmt: 'int', region: 'oceania', source: 'adsb.lol', sourceUrl: 'https://adsb.lol/', note: 'Airborne aircraft around Tokyo.' }),
+
+  // ── Crypto & on-chain
+  S({ id: 'crypto.btc.onchain_tx.daily', label: 'Bitcoin transactions confirmed per day', group: 'crypto', unit: 'tx/day', fmt: 'int', region: 'americas', source: 'Blockchain.com Charts API', sourceUrl: 'https://www.blockchain.com/explorer/charts/n-transactions', note: 'Every confirmed on-chain Bitcoin transaction.', featured: true }),
+  S({ id: 'crypto.eth.onchain_tx.daily', label: 'Ethereum transactions per day', group: 'crypto', unit: 'tx/day', fmt: 'int', region: 'americas', source: 'Blockscout (Ethereum)', sourceUrl: 'https://eth.blockscout.com/stats', note: 'Every on-chain Ethereum mainnet transaction.', featured: true }),
+  S({ id: 'crypto.btc.mempool_tx', label: 'Bitcoin transactions waiting (mempool)', group: 'crypto', unit: 'tx', fmt: 'int', region: 'americas', source: 'mempool.space', sourceUrl: 'https://mempool.space/', note: 'Unconfirmed transactions queued for the next blocks.' }),
+  S({ id: 'crypto.btc.tx_per_block', label: 'Transactions per Bitcoin block (last 6)', group: 'crypto', unit: 'tx/block', fmt: 'int', region: 'americas', source: 'mempool.space', sourceUrl: 'https://mempool.space/', note: 'Average over the six most recent blocks.' }),
+  S({ id: 'crypto.btc.fee_fastest_sat_vb', label: 'Bitcoin next-block fee', group: 'crypto', unit: 'sat/vB', fmt: 'dec', region: 'americas', source: 'mempool.space', sourceUrl: 'https://mempool.space/', note: 'Recommended fee for next-block confirmation.' }),
+  S({ id: 'crypto.usdt.supply_usd', label: 'Tether (USDT) supply', group: 'crypto', unit: 'USD', fmt: 'usd', region: 'americas', source: 'Tether transparency', sourceUrl: 'https://tether.to/en/transparency/', note: 'Total USDT issued across all chains — new minting shows up as a step.' }),
+
+  // ── Under the radar
+  S({ id: 'radar.ransomware_posts.daily', label: 'Ransomware leak-site victim posts per day', group: 'radar', unit: 'posts/day', fmt: 'int', region: 'americas', source: 'ransomware.live', sourceUrl: 'https://www.ransomware.live/', note: 'Organisations newly listed on ransomware groups\' leak sites, by discovery date. Counts only — no names are shown.', featured: true }),
+  S({ id: 'radar.breaches_disclosed.daily', label: 'Data breaches added to Have I Been Pwned', group: 'radar', unit: 'breaches/day', fmt: 'int', region: 'americas', source: 'Have I Been Pwned', sourceUrl: 'https://haveibeenpwned.com/PwnedWebsites', note: 'Breaches loaded into HIBP each day (disclosure, not occurrence, date).' }),
+  S({ id: 'radar.breached_accounts.daily', label: 'Breached accounts added to Have I Been Pwned', group: 'radar', unit: 'accounts/day', fmt: 'int', region: 'americas', source: 'Have I Been Pwned', sourceUrl: 'https://haveibeenpwned.com/PwnedWebsites', note: 'Accounts in the breaches loaded each day.' }),
+  S({ id: 'radar.cves_published.daily', label: 'New security vulnerabilities (CVEs) published', group: 'radar', unit: 'CVEs/day', fmt: 'int', region: 'americas', source: 'NIST National Vulnerability Database', sourceUrl: 'https://nvd.nist.gov/', note: 'CVE records published per day.', featured: true }),
+  S({ id: 'radar.cisa_kev_added.daily', label: 'Actively exploited vulnerabilities added by CISA', group: 'radar', unit: 'CVEs/day', fmt: 'int', region: 'americas', source: 'CISA KEV catalog', sourceUrl: 'https://www.cisa.gov/known-exploited-vulnerabilities-catalog', note: 'Vulnerabilities CISA confirms are being exploited in the wild.' }),
+  S({ id: 'radar.us.federal_register_docs.daily', label: 'US Federal Register documents published', group: 'radar', unit: 'docs/day', fmt: 'int', region: 'americas', source: 'FederalRegister.gov API', sourceUrl: 'https://www.federalregister.gov/', note: 'Rules, proposed rules, notices and presidential documents published each federal workday.' }),
+  S({ id: 'radar.sec_8k.daily', label: 'US company 8-K filings (material events)', group: 'radar', unit: 'filings/day', fmt: 'int', region: 'americas', source: 'SEC EDGAR', sourceUrl: 'https://www.sec.gov/edgar/search/', note: 'Companies must file an 8-K within four business days of a material event.' }),
+  S({ id: 'radar.sec_form4.daily', label: 'US insider-trading filings (Form 4)', group: 'radar', unit: 'filings/day', fmt: 'int', region: 'americas', source: 'SEC EDGAR', sourceUrl: 'https://www.sec.gov/edgar/search/', note: 'Executives and directors reporting trades in their own companies\' shares.' }),
+
   // ── Platform status
   S({ id: 'status.psn.issues', label: 'PlayStation Network active issues', group: 'status', unit: 'issues', fmt: 'int', region: 'americas', source: 'PlayStation Network status', sourceUrl: 'https://status.playstation.com/', unofficial: true, note: 'Count of reported service problems in the Americas and Europe.' }),
   S({ id: 'status.xbox.level', label: 'Xbox network status', group: 'status', unit: 'level', fmt: 'level', region: 'americas', source: 'Xbox status page', sourceUrl: 'https://support.xbox.com/xbox-live-status', note: '0 = operational … 3 = critical.' }),
@@ -138,8 +174,14 @@ export const SIGNALS: Signal[] = [
   S({ id: 'control.weather.la.temp_c', label: 'Los Angeles temperature', group: 'control', unit: '°C', fmt: 'temp', region: 'americas', source: 'Open-Meteo', sourceUrl: 'https://open-meteo.com/', note: 'Weather control for California demand.' }),
   S({ id: 'control.weather.sydney.temp_c', label: 'Sydney temperature', group: 'control', unit: '°C', fmt: 'temp', region: 'oceania', source: 'Open-Meteo', sourceUrl: 'https://open-meteo.com/', note: 'Weather control for NSW demand.' }),
   S({ id: 'control.weather.auckland.temp_c', label: 'Auckland temperature', group: 'control', unit: '°C', fmt: 'temp', region: 'oceania', source: 'Open-Meteo', sourceUrl: 'https://open-meteo.com/', note: 'Weather control for New Zealand.' }),
+  S({ id: 'control.earthquakes_m25.daily', label: 'Earthquakes of magnitude 2.5+ worldwide', group: 'control', unit: 'quakes/day', fmt: 'int', region: 'americas', source: 'USGS', sourceUrl: 'https://earthquake.usgs.gov/', note: 'The planet does not care about video games. If this "moves", that is just noise — a useful reminder.' }),
   S({ id: 'control.us.jobless_claims.weekly', label: 'US initial jobless claims', group: 'control', unit: 'claims/week', fmt: 'int', region: 'americas', source: 'FRED (U.S. Dept. of Labor)', sourceUrl: 'https://fred.stlouisfed.org/series/ICSA', note: 'Weekly US jobless claims. A video game should not move this — if it does, look for another cause.' }),
 ]
+
+// Third-party aggregators or community projects (documented, public, but not the original publisher).
+const PUBLIC_SOURCES = new Set(['Open-Meteo', 'Blockchain.com Charts API', 'Blockscout (Ethereum)', 'mempool.space', 'adsb.lol', 'OpenSky Network', 'Have I Been Pwned', 'ransomware.live', 'Alternative.me'])
+export const tierOf = (s: Signal): 'official' | 'public' | 'unofficial' => s.tier ?? (s.unofficial ? 'unofficial' : PUBLIC_SOURCES.has(s.source) ? 'public' : 'official')
+export const TIER_LABEL = { official: 'official source', public: 'public dataset', unofficial: 'unofficial endpoint' } as const
 
 export const SIGNAL_BY_ID = Object.fromEntries(SIGNALS.map((s) => [s.id, s])) as Record<string, Signal>
 
@@ -147,9 +189,13 @@ export const GROUPS: { key: Group; title: string; kicker: string; intro: string 
   { key: 'attention', title: 'The Cause', kicker: '01 — Attention', intro: 'Direct measures of how much of the world is looking at GTA VI right now.' },
   { key: 'games', title: 'Every Other Game', kicker: '02 — Gaming', intro: 'If everyone is in Leonida, who is left playing everything else? Concurrent players and viewers across PC, Roblox and streaming.' },
   { key: 'productivity', title: 'Work & the Internet', kicker: '03 — Productivity', intro: 'Code commits, package downloads, reading and posting — the rhythm of a working world.' },
-  { key: 'markets', title: 'Markets', kicker: '04 — Money', intro: 'The publisher, the platform makers, the competition for screen time, and the broader market.' },
-  { key: 'energy', title: 'The Grid', kicker: '05 — Energy', intro: 'If offices go quiet and living rooms light up, the grid should show it. National electricity demand, every 5–60 minutes.' },
-  { key: 'mobility', title: 'The Streets', kicker: '06 — Mobility', intro: 'Fewer commutes would mean bikes left in their docks, faster roads and quieter pavements. Do we see it?' },
-  { key: 'status', title: 'Under Load', kicker: '07 — Infrastructure', intro: 'Console networks and the services gamers lean on.' },
-  { key: 'control', title: 'Control Signals', kicker: '08 — Controls', intro: 'Things that should NOT move because of a video game. If these move too, be sceptical about everything above.' },
+  { key: 'study', title: 'School & Study', kicker: '04 — Education', intro: 'No one publishes live school attendance, so we watch what students leave behind: what they read, and the platform their coursework runs on.' },
+  { key: 'commute', title: 'Going to Work', kicker: '05 — Commuting', intro: 'Packed trains, parked cars, busy roads and full skies are what a normal working day looks like. Is it one?' },
+  { key: 'markets', title: 'Markets', kicker: '06 — Money', intro: 'The publisher, the platform makers, the competition for screen time, and the broader market.' },
+  { key: 'crypto', title: 'Crypto & On-chain', kicker: '07 — Crypto', intro: 'Prices, but also raw activity on the blockchains themselves — transactions, queues and new stablecoin supply.' },
+  { key: 'energy', title: 'The Grid', kicker: '08 — Energy', intro: 'If offices go quiet and living rooms light up, the grid should show it. National electricity demand, every 5–60 minutes.' },
+  { key: 'mobility', title: 'The Streets', kicker: '09 — Mobility', intro: 'Fewer commutes would mean bikes left in their docks, faster roads and quieter pavements. Do we see it?' },
+  { key: 'radar', title: 'While You Were Playing', kicker: '10 — Under the radar', intro: 'Some news is best released when nobody is watching. These are public records — breaches, ransomware claims, exploited vulnerabilities, government and company filings — counted per day against the four weeks before launch. Counts only; no names, no accusations.' },
+  { key: 'status', title: 'Under Load', kicker: '11 — Infrastructure', intro: 'Console networks and the services gamers lean on.' },
+  { key: 'control', title: 'Control Signals', kicker: '12 — Controls', intro: 'Things that should NOT move because of a video game. If these move too, be sceptical about everything above.' },
 ]

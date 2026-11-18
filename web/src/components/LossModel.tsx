@@ -13,8 +13,8 @@ export function LossModel({ params, setParams }: Props) {
   return (
     <section className="section" id="loss">
       <div className="section__head">
-        <div className="kicker">The headline number</div>
-        <h2>Estimated Loss</h2>
+        <div className="kicker">Scenario · model estimate, not data</div>
+        <h2>What might it cost?</h2>
         <p className="section__intro">
           This is a <strong>model estimate, not a measurement</strong>. For every economy: <code>absent workers × loss per
           worker-hour × working hours elapsed since its local midnight unlock</code>. It only ticks during local working

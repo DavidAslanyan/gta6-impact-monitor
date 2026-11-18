@@ -1,29 +1,17 @@
 import { useEffect, useState } from 'react'
 import { LAUNCH, T0 } from '../config'
 import { useNow } from '../data/live'
-import { fmtDuration, fmtUsd } from '../format'
-import { DEFAULT_PARAMS, ECONOMIES, localUnlock, totalLoss } from '../model/loss'
+import { fmtDuration } from '../format'
+import { useMemo } from 'react'
+import { buildBaseline, deltaAt } from '../data/baseline'
+import { seriesFor, useData } from '../data/store'
+import { fmtPct, fmtValue } from '../format'
+import { SIGNAL_BY_ID } from '../signals'
 
-/** When does the next unlocked-economy working day start? (for the "paused" message) */
-function nextTick(now: number, startHour: number) {
-  let best: { t: number; name: string } | null = null
-  for (const e of ECONOMIES) {
-    const unlock = localUnlock(e.tz)
-    for (let d = 0; d < 7; d++) {
-      const t = unlock + d * 86400 + startHour * 3600
-      const wd = new Date((t + e.tz * 3600) * 1000).getUTCDay()
-      if (t > now && wd !== 0 && wd !== 6) { if (!best || t < best.t) best = { t, name: e.name }; break }
-    }
-  }
-  return best
-}
-
-const SLIDES = [
-  'media/city-harbor-skyline-dusk.jpg',
-  'media/miami-sunset-skyline-artwork-ultrawide.jpg',
-  'media/beach-bridge-skyline-daytime.jpg',
-  'media/beach-green-coupe-oceanfront.jpg',
-]
+// Served at 1600px (desktop) or 900px (phones); only the visible and the next slide are ever downloaded.
+const SLIDE_NAMES = ['city-harbor-skyline-dusk', 'miami-sunset-skyline-artwork-ultrawide', 'beach-bridge-skyline-daytime']
+const SIZE = typeof window !== 'undefined' && window.innerWidth <= 900 ? 900 : 1600
+const SLIDES = SLIDE_NAMES.map((n) => `media/${n}-${SIZE}.jpg`)
 
 const MOMENTS = [
   { label: 'New Zealand', sub: '00:00 NZDT', t: LAUNCH.nz, color: 'var(--teal)' },
@@ -31,21 +19,20 @@ const MOMENTS = [
   { label: 'United States', sub: '00:00 EST', t: LAUNCH.us, color: 'var(--pink)' },
 ]
 
-export function Hero({ lossParams }: { lossParams: typeof DEFAULT_PARAMS }) {
+export function Hero() {
   const now = useNow(100) / 1000
   const [slide, setSlide] = useState(0)
   useEffect(() => {
     const id = setInterval(() => setSlide((s) => (s + 1) % SLIDES.length), 9000)
     return () => clearInterval(id)
   }, [])
-  const loss = totalLoss(lossParams, now)
   const since = now - T0
 
   return (
     <section className="hero" id="top">
       <div className="hero__bg" aria-hidden>
         {SLIDES.map((src, i) => (
-          <div key={src} className={`hero__slide ${i === slide ? 'is-on' : ''}`} style={{ backgroundImage: `url(${src})` }} />
+          <div key={src} className={`hero__slide ${i === slide ? 'is-on' : ''}`} style={i === slide || i === (slide + 1) % SLIDES.length || i === (slide + SLIDES.length - 1) % SLIDES.length ? { backgroundImage: `url(${src})` } : undefined} />
         ))}
         <div className="hero__shade" />
         <div className="hero__grid" />
@@ -53,7 +40,7 @@ export function Hero({ lossParams }: { lossParams: typeof DEFAULT_PARAMS }) {
 
       <div className="hero__inner">
         <div className="hero__eyebrow">
-          <span className="live-dot" /> LIVE · Fan-made data project · Not affiliated with Rockstar Games
+          <span className="live-dot" /> LIVE · Independent open-data project · Zero spoilers, promise
         </div>
         <img className="hero__logo" src="media/logo-vi.png" alt="Grand Theft Auto VI logo" />
         <h1 className="hero__title">
@@ -83,20 +70,50 @@ export function Hero({ lossParams }: { lossParams: typeof DEFAULT_PARAMS }) {
           })}
         </div>
 
-        <a className="loss" href="#loss">
-          <div className="loss__label">Estimated global productivity lost <span className="badge badge--warn">model estimate</span></div>
-          <div className="loss__value num">{fmtUsd(loss.total)}</div>
-          <div className="loss__rate">
-            {loss.rate > 0 ? <>+{fmtUsd(loss.rate)} every second right now · working hours are underway somewhere</> : (() => {
-              const n = nextTick(now, lossParams.workStart)
-              // The model covers each economy's first 10 working days after its unlock.
-              const lastWindow = n && n.t < localUnlock(-6) + 16 * 86400
-              return n && lastWindow ? <>Starts ticking when offices open in {n.name} — in {fmtDuration(n.t - now)}</> : <>Final — the model covers the first 10 working days after each unlock</>
-            })()}
-            <span className="loss__how"> · see how it's calculated ↓</span>
-          </div>
-        </a>
+        <Headlines />
       </div>
     </section>
+  )
+}
+
+// Measured headline numbers (never modelled ones): latest reading + Delta vs Baseline where it exists,
+// otherwise vs the median of the four weeks before launch for daily series.
+const HEADLINES = [
+  { id: 'kick.gta6.viewers', caption: 'people watching GTA VI live on Kick' },
+  { id: 'attention.wiki.gta6.all.daily', caption: 'GTA VI Wikipedia readers, latest full day' },
+  { id: 'steam.top100.players', caption: "playing Steam's top 100 games right now" },
+  { id: 'dev.github.commits.hourly', caption: 'public commits pushed to GitHub, last hour' },
+]
+
+function Headlines() {
+  const data = useData()
+  const tiles = useMemo(() => HEADLINES.map(({ id, caption }) => {
+    const sig = SIGNAL_BY_ID[id]
+    const pts = seriesFor(data, id)
+    const daily = /\.(daily|weekly)$/.test(id)
+    const last = daily ? pts[pts.length - 1] : data.latest[id] ?? pts[pts.length - 1]
+    if (!sig || !last) return { id, caption, value: null as string | null, delta: null as string | null, vs: '' }
+    const model = data.hourly[id] ? buildBaseline(sig, data.hourly[id]) : null
+    const d = deltaAt(model, last[0], last[1])
+    let delta: string | null = null
+    let vs = ''
+    if (d) { delta = fmtPct(d.pct); vs = 'vs Baseline' }
+    else if (daily) {
+      const prev = pts.filter((p) => p[0] < last[0] && p[0] >= last[0] - 28 * 86400).map((p) => p[1]).sort((a, b) => a - b)
+      if (prev.length >= 7) { const m = prev[prev.length >> 1]; delta = (last[1] / m).toFixed(1) + '×'; vs = 'its 4-week median' }
+    }
+    return { id, caption, value: fmtValue(last[1], sig.fmt, { compact: true }), delta, vs }
+  }), [data])
+  return (
+    <div className="headlines">
+      {tiles.map((t) => (
+        <a key={t.id} className="headline" href={`#${SIGNAL_BY_ID[t.id]?.group ?? 'pulse'}`}>
+          <div className="headline__value num">{t.value ?? '—'}</div>
+          <div className="headline__caption">{t.caption}</div>
+          {t.delta && <div className="headline__delta num">{t.delta} <span>{t.vs}</span></div>}
+        </a>
+      ))}
+      <div className="headline__foot">Measured, not modelled · every number links to its public source below</div>
+    </div>
   )
 }

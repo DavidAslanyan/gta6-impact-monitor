@@ -189,6 +189,115 @@ export const SOURCES = [
     },
   },
   {
+    key: 'tfl-crowding',
+    async run() {
+      // TfL's live crowding at major central-London stations, as a share of TfL's own typical level for this time.
+      const stations = { bank: '940GZZLUBNK', oxford_circus: '940GZZLUOXC', kings_cross: '940GZZLUKSX', liverpool_st: '940GZZLULVT', canary_wharf: '940GZZLUCYF', waterloo: '940GZZLUWLO' };
+      const vals = [];
+      for (const id of Object.values(stations)) {
+        try {
+          const j = await getJson(`https://api.tfl.gov.uk/crowding/${id}/Live`);
+          if (j.dataAvailable && Number.isFinite(j.percentageOfBaseline)) vals.push(j.percentageOfBaseline * 100);
+        } catch {}
+      }
+      if (!vals.length) throw new Error('no TfL crowding data');
+      return { 'commute.london.tube_crowding_pct': +(vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2) };
+    },
+  },
+  {
+    key: 'melbourne-parking',
+    async run() {
+      const j = await getJson('https://data.melbourne.vic.gov.au/api/explore/v2.1/catalog/datasets/on-street-parking-bay-sensors/records?select=status_description,count(*)%20as%20n&group_by=status_description&limit=10');
+      const by = Object.fromEntries(j.results.map((r) => [r.status_description, r.n]));
+      const total = (by.Present || 0) + (by.Unoccupied || 0);
+      if (!total) throw new Error('no parking data');
+      return { 'commute.melbourne.parking_occupied_pct': +((by.Present / total) * 100).toFixed(2) };
+    },
+  },
+  {
+    key: 'madrid-traffic',
+    async run() {
+      const xml = await getText('https://informo.madrid.es/informo/tmadrid/pm.xml', { timeoutMs: 60000 });
+      let sum = 0, n = 0;
+      for (const m of xml.matchAll(/<intensidad>(\d+)<\/intensidad>/g)) { sum += +m[1]; n++; }
+      if (n < 100) throw new Error('too few Madrid sensors');
+      return { 'traffic.madrid.vehicles_per_hour': Math.round(sum), 'traffic.madrid.sensors': n };
+    },
+  },
+  {
+    key: 'hongkong-traffic',
+    async run() {
+      const xml = await getText('https://resource.data.one.gov.hk/td/traffic-detectors/rawSpeedVol-all.xml', { timeoutMs: 60000 });
+      let sp = 0, ns = 0, vol = 0;
+      for (const m of xml.matchAll(/<lane>([\s\S]*?)<\/lane>/g)) {
+        const speed = +(m[1].match(/<speed>(-?\d+(?:\.\d+)?)<\/speed>/)?.[1] ?? NaN);
+        const v = +(m[1].match(/<volume>(\d+)<\/volume>/)?.[1] ?? NaN);
+        const valid = m[1].match(/<valid>([YN])<\/valid>/)?.[1];
+        if (valid === 'N') continue;
+        if (speed > 0 && speed < 150) { sp += speed; ns++; }
+        if (v >= 0) vol += v;
+      }
+      if (ns < 50) throw new Error('too few HK detectors');
+      return { 'traffic.hongkong.speed_kmh': +(sp / ns).toFixed(2), 'traffic.hongkong.volume': vol };
+    },
+  },
+  {
+    key: 'air-traffic',
+    async run() {
+      const out = {};
+      // OpenSky's anonymous quota is ~400 credits/day and a global query costs 4: sample every 20 minutes.
+      if (new Date().getUTCMinutes() % 20 < 5) {
+        try {
+          const j = await getJson('https://opensky-network.org/api/states/all', { timeoutMs: 40000 });
+          out['air.global.aircraft_airborne'] = (j.states || []).filter((s) => s[8] === false).length;
+        } catch {}
+      }
+      const hubs = { nyc: [40.64, -73.78], london: [51.47, -0.45], frankfurt: [50.04, 8.56], tokyo: [35.55, 139.78] };
+      for (const [k, [lat, lon]] of Object.entries(hubs)) {
+        try {
+          const j = await getJson(`https://api.adsb.lol/v2/point/${lat}/${lon}/150`, { timeoutMs: 30000 });
+          out[`air.${k}.aircraft`] = (j.ac || []).filter((a) => a.alt_baro !== 'ground').length;
+        } catch {}
+      }
+      if (!Object.keys(out).length) throw new Error('no air traffic data');
+      return out;
+    },
+  },
+  {
+    key: 'bitcoin-mempool',
+    async run() {
+      const [m, f, blocks] = await Promise.all([
+        getJson('https://mempool.space/api/mempool'),
+        getJson('https://mempool.space/api/v1/fees/recommended'),
+        getJson('https://mempool.space/api/v1/blocks'),
+      ]);
+      const recent = blocks.slice(0, 6);
+      return {
+        'crypto.btc.mempool_tx': m.count,
+        'crypto.btc.fee_fastest_sat_vb': f.fastestFee,
+        'crypto.btc.tx_per_block': Math.round(recent.reduce((a, b) => a + b.tx_count, 0) / recent.length),
+      };
+    },
+  },
+  {
+    key: 'tether-supply',
+    async run() {
+      const j = await getJson('https://app.tether.to/transparency.json');
+      const usdt = j.data?.usdt || {};
+      let total = 0;
+      for (const [k, v] of Object.entries(usdt)) if (k.startsWith('totaltokens_')) total += +v || 0;
+      if (!total) throw new Error('no Tether supply');
+      return { 'crypto.usdt.supply_usd': Math.round(total) };
+    },
+  },
+  {
+    key: 'canvas-status',
+    async run() {
+      const j = await getJson('https://status.instructure.com/api/v2/status.json');
+      return { 'status.canvas.level': statusIndicator[j.status?.indicator] ?? 0 };
+    },
+  },
+  {
     key: 'bluesky-firehose',
     async run() {
       const ms = 20000;
