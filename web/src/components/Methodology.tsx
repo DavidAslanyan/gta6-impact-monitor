@@ -95,7 +95,7 @@ export function Footer() {
       </div>
       <div className="footer__meta">
         All data comes from the public sources listed above, each under its own terms, and every series can be downloaded. Correlation is not causation. ·{' '}
-        <a href={REPO_URL} target="_blank" rel="noreferrer">Source code & raw data</a>
+        <a href={REPO_URL} target="_blank" rel="noreferrer">Source code & raw data</a> · © 2026 Davit Aslanyan
       </div>
     </footer>
   )

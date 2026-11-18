@@ -4,7 +4,7 @@
 
 A live, data-driven record of what happened to the world while Grand Theft Auto VI unlocked, one midnight at a time, starting in New Zealand on 18 Nov 2026 11:00 UTC. It covers markets, power grids, developer activity, internet attention, every other game, streets and bikes, and console networks. Everything is compared against the four weeks before launch.
 
-> Fan-made and independent. Not affiliated with Rockstar Games or Take-Two Interactive. Zero spoilers: the site shows only numbers, never third-party text, and uses only official pre-launch media published by Rockstar Games.
+> Independent open-data research project. Grand Theft Auto and GTA VI are trademarks of Take-Two Interactive Software, Inc.; this project is not affiliated with or endorsed by Take-Two or Rockstar Games. Zero spoilers, promise: the site shows only numbers and official pre-launch media published by Rockstar Games.
 
 ## How it works
 
@@ -37,3 +37,9 @@ cd web && npm install && npm run dev                                            
 | `CLOUDFLARE_API_TOKEN` | Internet traffic by country (Cloudflare Radar) | Cloudflare dashboard → My Profile → API Tokens → "Radar: Read" |
 
 The whole thing costs $0: GitHub Pages plus Actions on a public repo, using only free public APIs.
+
+## Author
+
+**Davit Aslanyan**: [LinkedIn](https://www.linkedin.com/in/david-aslanyan/) · [GitHub](https://github.com/DavidAslanyan)
+
+Designed, built and maintained the data research, the collectors and the dashboard.

@@ -4,6 +4,7 @@ import { Hero } from './components/Hero'
 import { LivePulse } from './components/LivePulse'
 import { LossModel } from './components/LossModel'
 import { Footer, Methodology } from './components/Methodology'
+import { Author } from './components/Author'
 import { Ticker } from './components/Ticker'
 import { Trailers } from './components/Trailers'
 import { UnlockMap } from './components/UnlockMap'
@@ -16,7 +17,7 @@ const NAV = [
   ['pulse', 'Live'], ['timeline', 'Timeline'], ['wave', 'Unlock wave'], ['attention', 'Cause'], ['games', 'Games'],
   ['productivity', 'Work'], ['study', 'School'], ['commute', 'Commute'], ['markets', 'Markets'], ['crypto', 'Crypto'],
   ['energy', 'Grid'], ['mobility', 'Streets'], ['radar', 'Radar'], ['status', 'Load'], ['control', 'Controls'],
-  ['loss', 'Scenario'], ['method', 'Method'],
+  ['loss', 'Scenario'], ['method', 'Method'], ['author', 'Author'],
 ] as const
 
 function readParams(): LossParams {
@@ -66,6 +67,7 @@ export default function App() {
         <LossModel params={lossParams} setParams={setLossParams} />
         <Trailers />
         <Methodology />
+        <Author />
       </main>
       <Footer />
     </RangeContext.Provider>
