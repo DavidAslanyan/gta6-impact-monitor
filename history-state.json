@@ -1,19 +1,19 @@
 {
  "weather": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "grid-fr": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "npm": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "grid-gb": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "fred": {
   "backfilled": true,
@@ -21,58 +21,62 @@
  },
  "grid-nz": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "wikipedia": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "grid-au": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "grid-caiso": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "github-activity": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "crypto": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "markets": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "cisa-kev": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "onchain-daily": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "hibp-breaches": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "ransomware-posts": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "federal-register": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "earthquakes": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
  },
  "nvd-cves": {
   "backfilled": true,
-  "lastRun": 1795013320
+  "lastRun": 1795022021
+ },
+ "dol-claims": {
+  "backfilled": true,
+  "lastRun": 1795022021
  }
 }
