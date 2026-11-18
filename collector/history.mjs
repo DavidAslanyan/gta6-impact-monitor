@@ -355,14 +355,15 @@ const HISTORY = [
     everyMinutes: 60,
     async run(backfill) {
       const pts = [];
-      for (let d = backfill ? 35 : 3; d >= 1; d--) {
+      for (let d = backfill ? 30 : 3; d >= 1; d--) {
         const day = ymd(new Date((now - d * DAY) * 1000));
         try {
-          const j = await getJson(`https://services.nvd.nist.gov/rest/json/cves/2.0?pubStartDate=${day}T00:00:00.000&pubEndDate=${day}T23:59:59.999&resultsPerPage=1`, { timeoutMs: 40000 });
+          const j = await getJson(`https://services.nvd.nist.gov/rest/json/cves/2.0?pubStartDate=${day}T00:00:00.000&pubEndDate=${day}T23:59:59.999&resultsPerPage=1`, { timeoutMs: 15000, retries: 0 });
           pts.push([Date.parse(day) / 1000, j.totalResults]);
         } catch {}
         await sleep(6500); // NVD allows 5 requests / 30 s without a key
       }
+      if (backfill && pts.length < 25) throw new Error(`NVD backfill incomplete (${pts.length}/30)`);
       if (!pts.length) throw new Error('NVD unavailable');
       return { 'radar.cves_published.daily': pts };
     },
@@ -523,7 +524,12 @@ await Promise.all(
     const backfill = isBackfill(src.key);
     const t0 = Date.now();
     try {
-      const out = await src.run(backfill);
+      // Time budget per source so one slow API can never stall the whole round (it retries next round).
+      const budget = (backfill ? 300 : 90) * 1000;
+      const out = await Promise.race([
+        src.run(backfill),
+        new Promise((_, reject) => setTimeout(() => reject(new Error(`timed out after ${budget / 1000}s`)), budget)),
+      ]);
       if (out === null) { console.log(`  · ${src.key}: not configured, skipped`); return; }
       let n = 0;
       for (const [id, pts] of Object.entries(out)) {
@@ -548,3 +554,5 @@ await writeJson(stateFile, state);
 await writeJson(join(DATA, 'health.json'), health);
 await writeJson(join(DATA, 'latest.json'), latest);
 console.log(`[${new Date(now * 1000).toISOString()}] history run done`);
+// Abandoned (timed-out) sources may still hold sockets open; exit so they cannot write after the state is saved.
+process.exit(0);
