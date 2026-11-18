@@ -1,4 +1,4 @@
-import { BASELINE_DAYS, DAY, HOUR, REGION_LAUNCH } from '../config'
+import { BASELINE_DAYS, DAY, HOUR, REGION_LAUNCH, type Region } from '../config'
 import type { Signal } from '../signals'
 import type { Point } from './store'
 
@@ -8,16 +8,40 @@ export interface Expectation { mean: number; std: number; n: number; mode: Basel
 
 export interface BaselineModel {
   launch: number
+  daily: boolean
   /** How many hours of pre-launch data the Baseline has. */
   spanHours: number
   points: number
   expected(t: number): Expectation | null
 }
 
-const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length
-const std = (xs: number[], m = mean(xs)) => (xs.length < 2 ? 0 : Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / (xs.length - 1)))
+// Robust statistics: the centre is the median and the spread is the scaled MAD, so a single glitch
+// (e.g. a grid reading that drops to a quarter for one hour) cannot drag the Baseline around.
+const median = (xs: number[]) => {
+  const s = [...xs].sort((a, b) => a - b)
+  const m = s.length >> 1
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2
+}
+const mad = (xs: number[], m = median(xs)) => 1.4826 * median(xs.map((x) => Math.abs(x - m)))
 
-const MARKET_GROUPS = new Set(['markets'])
+// Buckets are keyed by LOCAL weekday and hour in the Signal's home region, so the daylight-saving
+// changes inside the four-week window (Europe 25 Oct, US 1 Nov) do not mix different local hours.
+const REGION_TZ: Record<Region, string> = { oceania: 'Pacific/Auckland', europe: 'Europe/Paris', americas: 'America/New_York' }
+const WEEKDAYS: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }
+const fmtCache = new Map<string, Intl.DateTimeFormat>()
+const keyCache = new Map<string, { wd: number; h: number }>()
+function localParts(t: number, tz: string) {
+  const ck = tz + (t - (t % HOUR))
+  const hit = keyCache.get(ck)
+  if (hit) return hit
+  let f = fmtCache.get(tz)
+  if (!f) { f = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short', hour: 'numeric', hourCycle: 'h23' }); fmtCache.set(tz, f) }
+  const parts = f.formatToParts(new Date(t * 1000))
+  const r = { wd: WEEKDAYS[parts.find((p) => p.type === 'weekday')!.value], h: +parts.find((p) => p.type === 'hour')!.value % 24 }
+  if (keyCache.size > 50000) keyCache.clear()
+  keyCache.set(ck, r)
+  return r
+}
 
 function step(points: Point[]) {
   if (points.length < 3) return HOUR
@@ -25,59 +49,65 @@ function step(points: Point[]) {
   return gaps[Math.floor(gaps.length / 2)]
 }
 
+/** A point is "before launch" only if its whole bucket ended before the launch (daily buckets straddle it). */
+export const isPre = (model: BaselineModel, t: number) => (model.daily ? t + DAY <= model.launch : t < model.launch)
+
 export function buildBaseline(signal: Signal, hourly: Point[]): BaselineModel | null {
   const launch = REGION_LAUNCH[signal.region]
-  const pre = hourly.filter(([t]) => t < launch && t >= launch - BASELINE_DAYS * DAY)
+  const daily = step(hourly) >= 20 * HOUR
+  const pre = hourly.filter(([t]) => (daily ? t + DAY <= launch : t < launch) && t >= launch - BASELINE_DAYS * DAY)
   if (!pre.length) return null
   const spanHours = (launch - pre[0][0]) / HOUR
+  const base = { launch, daily, spanHours, points: pre.length }
 
   // Prices: compare with the last value before launch ("since launch").
-  if (MARKET_GROUPS.has(signal.group) && signal.fmt !== 'int') {
+  if (signal.group === 'markets' && signal.fmt !== 'int') {
     const last = pre[pre.length - 1][1]
-    const s = std(pre.slice(-48).map((p) => p[1]))
-    return { launch, spanHours, points: pre.length, expected: () => ({ mean: last, std: s, n: 1, mode: 'since-launch' }) }
+    const recent = pre.slice(-48).map((p) => p[1])
+    const s = Math.max(mad(recent), Math.abs(last) * 0.002)
+    return { ...base, expected: () => ({ mean: last, std: s, n: 1, mode: 'since-launch' }) }
   }
 
+  const tz = REGION_TZ[signal.region]
   const values = pre.map((p) => p[1])
-  const overall: Expectation = { mean: mean(values), std: std(values), n: values.length, mode: 'overall' }
-  const daily = step(pre) >= 20 * HOUR
+  const oMed = median(values)
+  const oMad = mad(values, oMed)
+  const overall: Expectation = { mean: oMed, std: Math.max(oMad, Math.abs(oMed) * 0.01), n: values.length, mode: 'overall' }
 
   const byKey = new Map<number, number[]>()
   const byHour = new Map<number, number[]>()
   for (const [t, v] of pre) {
-    const d = new Date(t * 1000)
-    const k = daily ? d.getUTCDay() : d.getUTCDay() * 24 + d.getUTCHours()
+    const { wd, h } = daily ? { wd: new Date(t * 1000).getUTCDay(), h: 0 } : localParts(t, tz)
+    const k = daily ? wd : wd * 24 + h
     if (!byKey.has(k)) byKey.set(k, [])
     byKey.get(k)!.push(v)
     if (!daily) {
-      const h = d.getUTCHours()
       if (!byHour.has(h)) byHour.set(h, [])
       byHour.get(h)!.push(v)
     }
   }
-  const cache = new Map<number, Expectation>()
+  const relSpread = oMad / (Math.abs(oMed) || 1)
   const fromBucket = (xs: number[], mode: BaselineMode): Expectation => {
-    const m = mean(xs)
-    // A bucket with one sample has no spread of its own; borrow the overall relative spread.
-    const s = xs.length >= 3 ? std(xs, m) : (overall.std / (overall.mean || 1)) * m
+    const m = median(xs)
+    // A bucket with few samples has no reliable spread of its own; borrow the overall relative spread.
+    const s = xs.length >= 4 ? mad(xs, m) : relSpread * Math.abs(m)
     return { mean: m, std: Math.max(s, Math.abs(m) * 0.01), n: xs.length, mode }
   }
+  const cache = new Map<number, Expectation>()
 
   return {
-    launch,
-    spanHours,
-    points: pre.length,
+    ...base,
     expected(t: number) {
-      const d = new Date(t * 1000)
-      const k = daily ? d.getUTCDay() : d.getUTCDay() * 24 + d.getUTCHours()
-      const ck = k
-      if (cache.has(ck)) return cache.get(ck)!
+      const { wd, h } = daily ? { wd: new Date(t * 1000).getUTCDay(), h: 0 } : localParts(t, tz)
+      const k = daily ? wd : wd * 24 + h
+      const hit = cache.get(k)
+      if (hit) return hit
       let e: Expectation
       const wk = byKey.get(k)
       if (wk && wk.length >= 2) e = fromBucket(wk, daily ? 'weekday' : 'weekday-hour')
-      else if (!daily && byHour.get(d.getUTCHours())?.length) e = fromBucket(byHour.get(d.getUTCHours())!, 'hour-of-day')
-      else e = { ...overall, std: Math.max(overall.std, Math.abs(overall.mean) * 0.01) }
-      cache.set(ck, e)
+      else if (!daily && byHour.get(h)?.length) e = fromBucket(byHour.get(h)!, 'hour-of-day')
+      else e = overall
+      cache.set(k, e)
       return e
     },
   }
@@ -86,7 +116,7 @@ export function buildBaseline(signal: Signal, hourly: Point[]): BaselineModel | 
 export interface DeltaInfo { value: number; expected: Expectation; pct: number; z: number; abs: number }
 
 export function deltaAt(model: BaselineModel | null, t: number, value: number): DeltaInfo | null {
-  if (!model || t < model.launch) return null
+  if (!model || isPre(model, t)) return null
   const e = model.expected(t)
   if (!e) return null
   const abs = value - e.mean
@@ -96,35 +126,33 @@ export function deltaAt(model: BaselineModel | null, t: number, value: number): 
 }
 
 export const MODE_LABEL: Record<BaselineMode, string> = {
-  'weekday-hour': 'same weekday & hour, 4 weeks before launch',
-  'hour-of-day': 'same hour of day before launch',
-  weekday: 'same weekday, 4 weeks before launch',
-  overall: 'pre-launch average',
+  'weekday-hour': 'median of the same weekday & local hour, 4 weeks before launch',
+  'hour-of-day': 'median of the same local hour before launch',
+  weekday: 'median of the same weekday, 4 weeks before launch',
+  overall: 'pre-launch median',
   'since-launch': 'last value before launch',
 }
 
-export interface Anomaly { t: number; signal: Signal; pct: number; z: number; value: number }
+export interface Anomaly { t: number; start: number; signal: Signal; pct: number; z: number; value: number }
 
-/** Unusually large Deltas after launch: |z| ≥ 3 and |Δ| ≥ 5%. Consecutive hours collapse to their peak. */
+/** Unusually large Deltas after launch: |z| ≥ 3 and |Δ| ≥ 5%. Consecutive hours collapse to one episode, stamped at its peak. */
 export function findAnomalies(signal: Signal, hourly: Point[], model: BaselineModel | null): Anomaly[] {
-  if (!model || signal.fmt === 'rank' || signal.fmt === 'level' || signal.group === 'control') return []
+  if (!model || ['rank', 'level', 'temp'].includes(signal.fmt) || signal.group === 'control') return []
   const out: Anomaly[] = []
   let run: Anomaly | null = null
   let lastT = 0
   for (const [t, v] of hourly) {
-    if (t < model.launch) continue
+    if (isPre(model, t)) continue
     const d = deltaAt(model, t, v)
-    const hit = d && Math.abs(d.z) >= 3 && Math.abs(d.pct) >= 5
-    if (hit) {
-      const a = { t, signal, pct: d.pct, z: d.z, value: v }
-      if (run && t - lastT <= 3 * HOUR && Math.sign(run.pct) === Math.sign(a.pct)) {
-        if (Math.abs(a.z) > Math.abs(run.z)) run = { ...a, t: run.t }
-      } else {
-        if (run) out.push(run)
-        run = a
-      }
-      lastT = t
+    if (!d || Math.abs(d.z) < 3 || Math.abs(d.pct) < 5) continue
+    const a: Anomaly = { t, start: t, signal, pct: d.pct, z: d.z, value: v }
+    if (run && t - lastT <= 3 * HOUR && Math.sign(run.pct) === Math.sign(a.pct)) {
+      if (Math.abs(a.z) > Math.abs(run.z)) run = { ...a, start: run.start }
+    } else {
+      if (run) out.push(run)
+      run = a
     }
+    lastT = t
   }
   if (run) out.push(run)
   return out

@@ -29,9 +29,11 @@ export function Methodology() {
           <h3>Baseline and Delta</h3>
           <p>
             The <b>Baseline</b> is what a Signal did before launch. Where four weeks of history exist, each new reading is compared
-            with the mean of the <i>same weekday and hour</i> over those four weeks; otherwise with the same hour of day, and otherwise
-            with the pre-launch average — every card says which. Prices are compared with their last pre-launch value. The dashed line
-            and grey band on each chart are the Baseline's expectation ± one standard deviation. The <b>Delta</b> is the percentage gap.
+            with the <i>median</i> of the same weekday and local hour over those four weeks; otherwise with the same local hour of day, and
+            otherwise with the pre-launch median — every card says which. Medians and a robust spread (scaled median absolute deviation)
+            are used so a single glitchy reading cannot distort the Baseline. Prices are compared with their last pre-launch value. Daily
+            series count launch day as "after". The dashed line and grey band on each chart are the Baseline's expectation ± that spread.
+            The <b>Delta</b> is the percentage gap; temperatures show the gap in °C.
           </p>
           <h3>Correlation, not causation</h3>
           <p>

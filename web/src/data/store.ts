@@ -35,19 +35,32 @@ async function fetchJson<T>(path: string): Promise<T> {
   return res.json()
 }
 
+// The long hourly bundle changes slowly: fetch it every 10 minutes; the 5-minute bundle every 2.
+let hourlyFetchedAt = 0
+let hourlyGenerated: number | null = null
 async function load() {
   try {
+    const needHourly = hourlyGenerated === null || Date.now() - hourlyFetchedAt > 10 * 60 * 1000
     const [h, r, latest, health] = await Promise.all([
-      fetchJson<Bundle>('bundle/hourly.json'),
+      needHourly ? fetchJson<Bundle>('bundle/hourly.json') : Promise.resolve(null),
       fetchJson<Bundle>('bundle/recent.json'),
       fetchJson<Record<string, Point>>('latest.json'),
       fetchJson<Record<string, Health>>('health.json'),
     ])
-    const hourly: Record<string, Point[]> = {}
+    let hourly = state.hourly
+    if (h) {
+      hourlyFetchedAt = Date.now()
+      if (h.generated !== hourlyGenerated) {
+        hourlyGenerated = h.generated
+        hourly = {}
+        for (const [id, g] of Object.entries(h.series)) hourly[id] = expand(g)
+      }
+    }
+    // Nothing new since last time: skip the re-render.
+    if (state.loaded && !state.error && r.generated === state.generated && hourly === state.hourly) return
     const recent: Record<string, Point[]> = {}
-    for (const [id, g] of Object.entries(h.series)) hourly[id] = expand(g)
     for (const [id, g] of Object.entries(r.series)) recent[id] = expand(g)
-    state = { loaded: true, error: null, generated: h.generated, hourly, recent, latest, health, version: state.version + 1 }
+    state = { loaded: true, error: null, generated: r.generated, hourly, recent, latest, health, version: state.version + 1 }
   } catch (e) {
     state = { ...state, loaded: true, error: String((e as Error).message) }
   }

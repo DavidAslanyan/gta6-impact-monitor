@@ -103,7 +103,7 @@ export const SIGNALS: Signal[] = [
   S({ id: 'crypto.fear_greed', label: 'Crypto Fear & Greed Index', group: 'markets', unit: '0–100', fmt: 'int', region: 'americas', source: 'Alternative.me', sourceUrl: 'https://alternative.me/crypto/fear-and-greed-index/', note: 'Daily sentiment index.' }),
 
   // ── Energy
-  S({ id: 'energy.gb.demand_mw', label: 'Great Britain electricity demand', group: 'energy', unit: 'MW', fmt: 'mw', region: 'europe', source: 'Elexon BMRS', sourceUrl: 'https://bmrs.elexon.co.uk/', note: '5-minute national demand outturn. Offices empty, living rooms full.', featured: true }),
+  S({ id: 'energy.gb.demand_mw', label: 'Great Britain electricity demand', group: 'energy', unit: 'MW', fmt: 'mw', region: 'europe', source: 'Elexon BMRS', sourceUrl: 'https://bmrs.elexon.co.uk/', note: '5-minute national demand outturn. If people stay home, demand can shift from offices to living rooms.', featured: true }),
   S({ id: 'energy.fr.demand_mw', label: 'France electricity demand', group: 'energy', unit: 'MW', fmt: 'mw', region: 'europe', source: 'RTE eco2mix (ODRÉ)', sourceUrl: 'https://odre.opendatasoft.com/explore/dataset/eco2mix-national-tr/', note: '15-minute national consumption.', featured: true }),
   S({ id: 'energy.au.nsw.demand_mw', label: 'New South Wales electricity demand', group: 'energy', unit: 'MW', fmt: 'mw', region: 'oceania', source: 'AEMO', sourceUrl: 'https://aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem/aggregated-data', note: '5-minute total demand, Sydney\'s grid region.' }),
   S({ id: 'energy.au.vic.demand_mw', label: 'Victoria electricity demand', group: 'energy', unit: 'MW', fmt: 'mw', region: 'oceania', source: 'AEMO', sourceUrl: 'https://aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem/aggregated-data', note: '5-minute total demand, Melbourne\'s grid region.' }),
@@ -115,11 +115,11 @@ export const SIGNALS: Signal[] = [
   S({ id: 'energy.nz.generation_mwh.daily', label: 'New Zealand electricity generated per day', group: 'energy', unit: 'MWh/day', fmt: 'int', region: 'oceania', source: 'em6 (Transpower)', sourceUrl: 'https://www.em6.co.nz/', note: 'All fuels. The first country to unlock.' }),
 
   // ── Mobility
-  S({ id: 'bike.nyc.available', label: 'Idle Citi Bikes in New York', group: 'mobility', unit: 'bikes', fmt: 'int', region: 'americas', source: 'Citi Bike GBFS', sourceUrl: 'https://citibikenyc.com/system-data', note: 'Bikes sitting in docks. More idle bikes = fewer people riding.', featured: true }),
+  S({ id: 'bike.nyc.available', label: 'Idle Citi Bikes in New York', group: 'mobility', unit: 'bikes', fmt: 'int', region: 'americas', source: 'Citi Bike GBFS', sourceUrl: 'https://citibikenyc.com/system-data', note: 'Bikes sitting in docks. More idle bikes usually means fewer people riding — but also night-time and operator rebalancing.', featured: true }),
   S({ id: 'bike.london.available', label: 'Idle Santander Cycles in London', group: 'mobility', unit: 'bikes', fmt: 'int', region: 'europe', source: 'TfL Unified API', sourceUrl: 'https://api.tfl.gov.uk/', note: 'Bikes sitting in docks. More idle bikes = fewer people riding.', featured: true }),
   S({ id: 'bike.paris.available', label: 'Idle Vélib\' bikes in Paris', group: 'mobility', unit: 'bikes', fmt: 'int', region: 'europe', source: 'Paris Open Data', sourceUrl: 'https://opendata.paris.fr/explore/dataset/velib-disponibilite-en-temps-reel/', note: 'Bikes sitting in docks. More idle bikes = fewer people riding.' }),
   S({ id: 'bike.toronto.available', label: 'Idle Bike Share bikes in Toronto', group: 'mobility', unit: 'bikes', fmt: 'int', region: 'americas', source: 'Bike Share Toronto GBFS', sourceUrl: 'https://bikesharetoronto.com/system-data/', note: 'Bikes sitting in docks.' }),
-  S({ id: 'traffic.nyc.speed_mph', label: 'New York average road speed', group: 'mobility', unit: 'mph', fmt: 'dec', region: 'americas', source: 'NYC DOT real-time speeds', sourceUrl: 'https://data.cityofnewyork.us/Transportation/DOT-Traffic-Speeds-NBE/i4gi-tjb9', note: 'Mean speed over the latest sensor readings. Emptier roads move faster.', featured: true }),
+  S({ id: 'traffic.nyc.speed_mph', label: 'New York average road speed', group: 'mobility', unit: 'mph', fmt: 'dec', region: 'americas', source: 'NYC DOT real-time speeds', sourceUrl: 'https://data.cityofnewyork.us/Transportation/DOT-Traffic-Speeds-NBE/i4gi-tjb9', note: 'Mean speed over the latest sensor readings. Emptier roads tend to move faster.', featured: true }),
   S({ id: 'footfall.melbourne.per_min', label: 'Melbourne CBD pedestrians per minute', group: 'mobility', unit: 'people/min', fmt: 'dec', region: 'oceania', source: 'City of Melbourne', sourceUrl: 'https://data.melbourne.vic.gov.au/', note: 'Footfall sensors across the city centre.', featured: true }),
 
   // ── Platform status
@@ -138,7 +138,7 @@ export const SIGNALS: Signal[] = [
   S({ id: 'control.weather.la.temp_c', label: 'Los Angeles temperature', group: 'control', unit: '°C', fmt: 'temp', region: 'americas', source: 'Open-Meteo', sourceUrl: 'https://open-meteo.com/', note: 'Weather control for California demand.' }),
   S({ id: 'control.weather.sydney.temp_c', label: 'Sydney temperature', group: 'control', unit: '°C', fmt: 'temp', region: 'oceania', source: 'Open-Meteo', sourceUrl: 'https://open-meteo.com/', note: 'Weather control for NSW demand.' }),
   S({ id: 'control.weather.auckland.temp_c', label: 'Auckland temperature', group: 'control', unit: '°C', fmt: 'temp', region: 'oceania', source: 'Open-Meteo', sourceUrl: 'https://open-meteo.com/', note: 'Weather control for New Zealand.' }),
-  S({ id: 'control.us.jobless_claims.weekly', label: 'US initial jobless claims', group: 'control', unit: 'claims/week', fmt: 'int', region: 'americas', source: 'FRED (U.S. Dept. of Labor)', sourceUrl: 'https://fred.stlouisfed.org/series/ICSA', note: 'Nobody gets fired for playing GTA — at least not in the first week. This should not move.' }),
+  S({ id: 'control.us.jobless_claims.weekly', label: 'US initial jobless claims', group: 'control', unit: 'claims/week', fmt: 'int', region: 'americas', source: 'FRED (U.S. Dept. of Labor)', sourceUrl: 'https://fred.stlouisfed.org/series/ICSA', note: 'Weekly US jobless claims. A video game should not move this — if it does, look for another cause.' }),
 ]
 
 export const SIGNAL_BY_ID = Object.fromEntries(SIGNALS.map((s) => [s.id, s])) as Record<string, Signal>
@@ -148,8 +148,8 @@ export const GROUPS: { key: Group; title: string; kicker: string; intro: string 
   { key: 'games', title: 'Every Other Game', kicker: '02 — Gaming', intro: 'If everyone is in Leonida, who is left playing everything else? Concurrent players and viewers across PC, Roblox and streaming.' },
   { key: 'productivity', title: 'Work & the Internet', kicker: '03 — Productivity', intro: 'Code commits, package downloads, reading and posting — the rhythm of a working world.' },
   { key: 'markets', title: 'Markets', kicker: '04 — Money', intro: 'The publisher, the platform makers, the competition for screen time, and the broader market.' },
-  { key: 'energy', title: 'The Grid', kicker: '05 — Energy', intro: 'Offices go dark, living rooms light up. National electricity demand, every 5–60 minutes.' },
-  { key: 'mobility', title: 'The Streets', kicker: '06 — Mobility', intro: 'Bikes left in their docks, faster roads, quieter pavements.' },
+  { key: 'energy', title: 'The Grid', kicker: '05 — Energy', intro: 'If offices go quiet and living rooms light up, the grid should show it. National electricity demand, every 5–60 minutes.' },
+  { key: 'mobility', title: 'The Streets', kicker: '06 — Mobility', intro: 'Fewer commutes would mean bikes left in their docks, faster roads and quieter pavements. Do we see it?' },
   { key: 'status', title: 'Under Load', kicker: '07 — Infrastructure', intro: 'Console networks and the services gamers lean on.' },
   { key: 'control', title: 'Control Signals', kicker: '08 — Controls', intro: 'Things that should NOT move because of a video game. If these move too, be sceptical about everything above.' },
 ]

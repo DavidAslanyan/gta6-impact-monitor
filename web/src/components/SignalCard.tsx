@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { CALENDAR_EFFECTS, LAUNCH_MARKERS, REGION_LABEL } from '../config'
+import { CALENDAR_EFFECTS, LAUNCH_MARKERS, REGION_LABEL, REGION_LAUNCH } from '../config'
 import { buildBaseline, deltaAt, MODE_LABEL } from '../data/baseline'
 import { seriesFor, useData, type Point } from '../data/store'
 import { fmtAgo, fmtPct, fmtUtc, fmtValue } from '../format'
@@ -95,7 +95,7 @@ export function SignalCard({ signal, big = false }: { signal: Signal; big?: bool
   }, [pts, model, hourly, range, color, signal, nowS])
 
   const dGood = delta ? (signal.inverted ? -delta.pct : delta.pct) : 0
-  const showAbs = signal.fmt === 'rank' || signal.fmt === 'level'
+  const showAbs = signal.fmt === 'rank' || signal.fmt === 'level' || signal.fmt === 'temp'
   const strong = delta && Math.abs(delta.z) >= 3 && Math.abs(delta.pct) >= 5
 
   return (
@@ -117,6 +117,9 @@ export function SignalCard({ signal, big = false }: { signal: Signal; big?: bool
               {fmtPct(delta.pct)}
             </span>
           )}
+          {delta && signal.fmt === 'temp' && (
+            <span className="delta" title={`vs Baseline (${MODE_LABEL[delta.expected.mode]})`}>{delta.abs >= 0 ? '+' : '−'}{Math.abs(delta.abs).toFixed(1)} °C</span>
+          )}
           {delta && showAbs && signal.fmt === 'rank' && (
             <span className={`delta ${delta.abs < 0 ? 'delta--up' : delta.abs > 0 ? 'delta--down' : ''}`}>{delta.abs < 0 ? '▲' : delta.abs > 0 ? '▼' : '='} {Math.abs(Math.round(delta.abs))} places</span>
           )}
@@ -126,7 +129,15 @@ export function SignalCard({ signal, big = false }: { signal: Signal; big?: bool
       <footer className="card__foot">
         <span className="card__note">{signal.note}</span>
         <span className="card__meta">
-          {delta ? <>Baseline: {MODE_LABEL[delta.expected.mode]}{model && model.spanHours < 72 ? ` (${Math.round(model.spanHours)} h of pre-launch data)` : ''} · </> : <>Recording the Baseline until the {signal.region === 'oceania' ? 'NZ' : signal.region === 'europe' ? 'Europe' : 'US'} unlock{model && nowS < model.launch ? ` (in ${Math.max(1, Math.round((model.launch - nowS) / 3600))} h)` : ''} · </>}
+          {delta ? (
+            <>Baseline: {MODE_LABEL[delta.expected.mode]}{model && model.spanHours < 72 ? ` (${Math.round(model.spanHours)} h of pre-launch data)` : ''} · </>
+          ) : nowS < REGION_LAUNCH[signal.region] ? (
+            <>Recording the Baseline until the {signal.region === 'oceania' ? 'NZ' : signal.region === 'europe' ? 'Europe' : 'US'} unlock (in {Math.max(1, Math.round((REGION_LAUNCH[signal.region] - nowS) / 3600))} h) · </>
+          ) : !model ? (
+            <>No pre-launch readings were recorded, so this Signal has no Baseline · </>
+          ) : periodic ? (
+            <>First post-launch {signal.id.endsWith('.weekly') ? 'week' : 'day'} not complete yet · </>
+          ) : null}
           {latest ? <span className={stale ? 'stale' : ''}>updated {fmtAgo(latest[0])}</span> : null} ·{' '}
           <a href={signal.sourceUrl} target="_blank" rel="noreferrer">{signal.source}</a>
         </span>

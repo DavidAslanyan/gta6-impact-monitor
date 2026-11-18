@@ -37,12 +37,22 @@ const HISTORY = [
         const pts = [];
         const enc = encodeURIComponent(sym);
         try {
-          if (backfill) {
-            const d = await getJson(`https://ts-api.cnbc.com/harmony/app/charts/1M.json?symbol=${enc}`);
-            for (const b of d.barData?.priceBars || []) pts.push([Math.floor(b.tradeTimeinMills / 1000), +b.close]);
-          }
+          // Intraday 5-minute bars, snapped to the 5-minute grid (CNBC's bar phase shifts between calls).
           const i = await getJson(`https://ts-api.cnbc.com/harmony/app/charts/5D.json?symbol=${enc}`);
-          for (const b of i.barData?.priceBars || []) pts.push([Math.floor(b.tradeTimeinMills / 1000), +b.close]);
+          for (const b of i.barData?.priceBars || []) {
+            const t = Math.floor(b.tradeTimeinMills / 1000);
+            pts.push([t - (t % 300), +b.close]);
+          }
+          if (backfill) {
+            // Daily closes only for days before the intraday window, stamped at the US close (21:00 UTC in winter).
+            const firstIntraday = pts.length ? Math.min(...pts.map((p) => p[0])) : Infinity;
+            const d = await getJson(`https://ts-api.cnbc.com/harmony/app/charts/1M.json?symbol=${enc}`);
+            for (const b of d.barData?.priceBars || []) {
+              const day = Math.floor(b.tradeTimeinMills / 1000 / DAY) * DAY;
+              const t = day + 21 * 3600;
+              if (t < firstIntraday - 6 * 3600) pts.push([t, +b.close]);
+            }
+          }
         } catch {}
         if (pts.length) out[`mkt.${slug}.price`] = pts;
         await sleep(250);
@@ -56,8 +66,10 @@ const HISTORY = [
       const out = {};
       for (const [sym, slug] of [['BTCUSDT', 'btc'], ['ETHUSDT', 'eth']]) {
         const k = await getJson(`https://data-api.binance.vision/api/v3/klines?symbol=${sym}&interval=1h&limit=${backfill ? 1000 : 48}`);
-        out[`crypto.${slug}.price`] = k.map((r) => [r[0] / 1000, +r[4]]);
-        out[`crypto.${slug}.trades_per_hour`] = k.map((r) => [r[0] / 1000, +r[8]]);
+        // The last kline is the still-open hour; keep only completed hours (r[6] = close time in ms).
+        const done = k.filter((r) => r[6] < Date.now());
+        out[`crypto.${slug}.price`] = done.map((r) => [r[0] / 1000, +r[4]]);
+        out[`crypto.${slug}.trades_per_hour`] = done.map((r) => [r[0] / 1000, +r[8]]);
       }
       const f = await getJson(`https://api.alternative.me/fng/?limit=${backfill ? 120 : 5}`);
       out['crypto.fear_greed'] = f.data.map((d) => [+d.timestamp, +d.value]);
@@ -86,7 +98,8 @@ const HISTORY = [
           for (const [t, v] of pts) total.set(t, (total.get(t) || 0) + v);
         } catch {}
       }
-      out['attention.wiki.gta6.all.daily'] = [...total.entries()];
+      // Only write the combined total when every language answered; a partial sum would look like a drop.
+      if (Object.keys(out).length === Object.keys(articles).length) out['attention.wiki.gta6.all.daily'] = [...total.entries()];
       const agg = await getJson(
         `https://wikimedia.org/api/rest_v1/metrics/pageviews/aggregate/all-projects/all-access/user/hourly/${ymdCompact(start)}00/${ymdCompact(end)}23`,
         { headers: WIKI_UA },
@@ -106,7 +119,11 @@ const HISTORY = [
         const j = await getJson(`https://data.elexon.co.uk/bmrs/api/v1/demand/outturn/summary?resolution=minute&from=${from}&to=${to}&format=json`);
         for (const r of j) pts.push([Date.parse(r.startTime) / 1000, r.demand]);
       }
-      return { 'energy.gb.demand_mw': pts };
+      // Elexon occasionally publishes glitch readings (e.g. ~7.8 GW for an hour amid ~31 GW). Drop readings
+      // below half of the batch median — GB demand never halves within minutes.
+      const sorted = pts.map((p) => p[1]).sort((a, b) => a - b);
+      const med = sorted[sorted.length >> 1] || 0;
+      return { 'energy.gb.demand_mw': pts.filter((p) => p[1] > med * 0.5) };
     },
   },
   {
@@ -231,13 +248,16 @@ const HISTORY = [
   },
   {
     key: 'cloudflare-radar',
-    async run(backfill) {
+    replace: true,
+    async run() {
       const token = process.env.CLOUDFLARE_API_TOKEN;
       if (!token) return null;
       const out = {};
       for (const cc of ['NZ', 'AU', 'JP', 'GB', 'DE', 'FR', 'US', 'BR']) {
         const j = await getJson(
-          `https://api.cloudflare.com/client/v4/radar/http/timeseries?location=${cc}&dateRange=${backfill ? '28d' : '2d'}&aggInterval=1h&format=json`,
+          // Radar normalises values within each response, so always request the SAME window (fixed start → now)
+          // and replace the whole series; every point then shares one scale.
+          `https://api.cloudflare.com/client/v4/radar/http/timeseries?location=${cc}&dateStart=2026-10-20T00:00:00Z&dateEnd=${new Date(now * 1000).toISOString().slice(0, 14)}00:00Z&aggInterval=1h&format=json`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
         const s = j.result?.serie_0;
@@ -338,6 +358,7 @@ await Promise.all(
       let n = 0;
       for (const [id, pts] of Object.entries(out)) {
         if (!pts?.length) continue;
+        if (src.replace) await rm(join(DATA, 'series', id), { recursive: true, force: true });
         const last = await mergePoints(id, pts);
         if (last) latest[id] = last;
         n += pts.length;

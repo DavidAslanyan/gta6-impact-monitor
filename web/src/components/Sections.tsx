@@ -21,6 +21,7 @@ export function SignalSection({ group }: { group: Group }) {
         <h2>{meta.title}</h2>
         <p className="section__intro">{meta.intro}</p>
       </div>
+      {data.error && !data.generated && <div className="panel data-down">Recorded data could not be loaded right now ({data.error}). Retrying every 2 minutes — the live feeds above are unaffected.</div>}
       {featured.length > 0 && <div className="grid grid--big">{featured.map((s) => <SignalCard key={s.id} signal={s} big />)}</div>}
       {rest.length > 0 && <div className="grid">{rest.map((s) => <SignalCard key={s.id} signal={s} />)}</div>}
     </section>
@@ -54,7 +55,7 @@ export function AnomalyFeed() {
         <h2>The timeline</h2>
         <p className="section__intro">
           Written by the data, not by us. A line appears here whenever a Signal moves unusually far from its Baseline —
-          at least 3× its normal spread and at least 5% — collapsed to the peak of each episode. {anomalyCount ? `${anomalyCount} so far.` : 'None yet — they appear as the after-launch data comes in.'}
+          at least 3× its normal spread and at least 5% — stamped at the peak of each episode. {data.error && !data.generated ? 'Recorded data could not be loaded right now — retrying.' : !data.loaded ? 'Loading…' : anomalyCount ? `${anomalyCount} so far.` : 'None yet — they appear as the after-launch data comes in.'}
         </p>
       </div>
       <ol className="feed panel">
@@ -65,7 +66,7 @@ export function AnomalyFeed() {
               <div className="feed__title">{it.title}</div>
               {it.a ? (
                 <div className="feed__detail">
-                  <span className={`delta ${it.a.pct > 0 ? 'delta--up' : 'delta--down'}`}>{fmtPct(it.a.pct)}</span> vs Baseline · reading {fmtValue(it.a.value, it.a.signal.fmt)} {it.a.signal.unit} · {Math.abs(it.a.z).toFixed(1)}σ
+                  <span className={`delta ${it.a.pct > 0 ? 'delta--up' : 'delta--down'}`}>{fmtPct(it.a.pct)}</span> vs Baseline at the peak · reading {fmtValue(it.a.value, it.a.signal.fmt)} {it.a.signal.unit} · {Math.abs(it.a.z).toFixed(1)} robust σ{it.a.start !== it.a.t ? ` · episode began ${fmtUtc(it.a.start, false)}` : ''}
                 </div>
               ) : (
                 <div className="feed__detail">{it.detail}</div>

@@ -193,7 +193,7 @@ export const SOURCES = [
     async run() {
       const ms = 20000;
       let posts = 0, gta = 0;
-      const re = /\bgta\s?(vi|6)\b|grand theft auto (vi|6)|#gta6|\bleonida\b|vice city/i;
+      const re = /\bgta\s?(vi|6)\b|grand theft auto (vi|6)|#gta6|\bleonida\b/i; // same pattern as the browser feed
       await sampleWs('wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post', ms, (raw) => {
         try {
           const m = JSON.parse(raw);

@@ -89,7 +89,9 @@ export function Hero({ lossParams }: { lossParams: typeof DEFAULT_PARAMS }) {
           <div className="loss__rate">
             {loss.rate > 0 ? <>+{fmtUsd(loss.rate)} every second right now · working hours are underway somewhere</> : (() => {
               const n = nextTick(now, lossParams.workStart)
-              return n ? <>Starts ticking when offices open in {n.name} — in {fmtDuration(n.t - now)}</> : <>Paused outside working hours</>
+              // The model covers each economy's first 10 working days after its unlock.
+              const lastWindow = n && n.t < localUnlock(-6) + 16 * 86400
+              return n && lastWindow ? <>Starts ticking when offices open in {n.name} — in {fmtDuration(n.t - now)}</> : <>Final — the model covers the first 10 working days after each unlock</>
             })()}
             <span className="loss__how"> · see how it's calculated ↓</span>
           </div>

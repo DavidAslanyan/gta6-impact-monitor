@@ -25,7 +25,10 @@ let registered = false
 export function UnlockMap() {
   const [ready, setReady] = useState(registered)
   const [offsets, setOffsets] = useState<Record<string, number>>({})
-  const now = useNow(5000) / 1000
+  const tick = useNow(30000) / 1000
+  // After the last unlock (UTC−12, 19 Nov 12:00Z) the map is final: freeze the clock so it stops re-rendering.
+  const now = Math.min(tick, Date.UTC(2026, 10, 19, 13) / 1000)
+  const mapHeight = typeof window !== 'undefined' && window.innerWidth < 720 ? 250 : 460
 
   useEffect(() => {
     if (registered) return
@@ -107,7 +110,7 @@ export function UnlockMap() {
             <div><div className="stat-num num">100%</div><div className="stat-label">of the world has the game</div></div>
           )}
         </div>
-        {ready ? <EChart option={option} height={420} /> : <div className="card__empty" style={{ height: 420 }}>Loading map…</div>}
+        {ready ? <EChart option={option} height={mapHeight} /> : <div className="card__empty" style={{ height: mapHeight }}>Loading map…</div>}
       </div>
     </section>
   )

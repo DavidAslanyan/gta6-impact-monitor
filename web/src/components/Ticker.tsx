@@ -2,8 +2,8 @@ import { useQuotes } from '../data/live'
 import { fmtPct } from '../format'
 
 export function Ticker() {
-  const { data } = useQuotes()
-  if (!data?.length) return <div className="ticker ticker--empty">Loading market quotes…</div>
+  const { data, error, at } = useQuotes()
+  if (!data?.length) return <div className="ticker ticker--empty">{error ? 'Market quotes unavailable right now — retrying' : 'Loading market quotes…'}</div>
   const items = data.map((q) => (
     <span key={q.symbol} className="ticker__item">
       <b>{q.name}</b>
@@ -14,6 +14,7 @@ export function Ticker() {
   ))
   return (
     <div className="ticker" aria-label="Market quotes">
+      <span className="ticker__src">CNBC · {new Date(at).toISOString().slice(11, 16)} UTC</span>
       <div className="ticker__track"><span className="ticker__group">{items}</span><span className="ticker__group" aria-hidden>{items}</span></div>
     </div>
   )

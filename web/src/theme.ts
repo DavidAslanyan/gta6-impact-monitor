@@ -30,7 +30,7 @@ export const GROUP_COLOR: Record<Group, string> = {
 }
 
 export type Range = '48h' | '7d' | '30d'
-export const RANGE_SECONDS: Record<Range, number> = { '48h': 48 * 3600, '7d': 7 * 86400, '30d': 35 * 86400 }
+export const RANGE_SECONDS: Record<Range, number> = { '48h': 48 * 3600, '7d': 7 * 86400, '30d': 400 * 86400 } // 'all' = everything in the bundle
 
 export const RangeContext = createContext<{ range: Range; setRange: (r: Range) => void }>({ range: '7d', setRange: () => {} })
 export const useRange = () => useContext(RangeContext)

@@ -4,6 +4,11 @@
 cd "${0:A:h}/.."
 export GITHUB_TOKEN=$(gh auth token)
 while true; do
+  # Hand over to GitHub Actions: once the cron has pushed to the data branch, stop this local writer
+  # so there is only ever one writer.
+  ( cd data && git fetch -q origin data ) && if (cd data && git log origin/data -20 --format='%an %s' | grep -q '^gta6-monitor-bot data:.*Z$'); then
+    echo "GitHub Actions collector is live — stopping the local recorder." >> .local/recorder.log; exit 0
+  fi
   {
     node collector/snapshot.mjs
     node collector/history.mjs

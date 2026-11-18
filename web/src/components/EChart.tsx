@@ -36,7 +36,7 @@ export function EChart({ option, height, className, merge = false }: Props) {
   }, [])
 
   useEffect(() => {
-    chart.current?.setOption(option, { notMerge: !merge, lazyUpdate: true })
+    chart.current?.setOption({ useUTC: true, ...option }, { notMerge: !merge, lazyUpdate: true })
   }, [option, merge])
 
   return <div ref={ref} className={className} style={{ height, width: '100%' }} />
