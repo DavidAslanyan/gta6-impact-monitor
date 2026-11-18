@@ -1,102 +1,102 @@
 {
  "steam-charts": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "steam-apps": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "roblox": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": true,
   "failingSince": null
  },
  "kick": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": true,
   "failingSince": null
  },
  "bike-citibike": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "bike-toronto": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "bike-velib": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "bike-london": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "nyc-traffic": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "melbourne-footfall": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "psn-status": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": true,
   "failingSince": null
  },
  "statuspages": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "app-store": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "bluesky-firehose": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "wikimedia-stream": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "weather": {
   "ok": true,
-  "lastOk": 1795022021,
+  "lastOk": 1795022421,
   "failingSince": null
  },
  "grid-fr": {
   "ok": true,
-  "lastOk": 1795022021,
+  "lastOk": 1795022421,
   "failingSince": null
  },
  "npm": {
@@ -106,14 +106,8 @@
  },
  "grid-gb": {
   "ok": true,
-  "lastOk": 1795022021,
+  "lastOk": 1795022421,
   "failingSince": null
- },
- "fred": {
-  "ok": false,
-  "lastOk": 1795008981,
-  "failingSince": 1795009290,
-  "error": "The operation was aborted due to timeout"
  },
  "grid-nz": {
   "ok": true,
@@ -127,74 +121,74 @@
  },
  "crypto": {
   "ok": true,
-  "lastOk": 1795022021,
+  "lastOk": 1795022421,
   "failingSince": null
  },
  "grid-au": {
   "ok": true,
-  "lastOk": 1795022021,
+  "lastOk": 1795022421,
   "failingSince": null
  },
  "markets": {
   "ok": true,
-  "lastOk": 1795022021,
+  "lastOk": 1795022421,
   "failingSince": null
  },
  "grid-caiso": {
   "ok": true,
-  "lastOk": 1795022021,
+  "lastOk": 1795022421,
   "failingSince": null
  },
  "github-activity": {
   "ok": true,
-  "lastOk": 1795022021,
+  "lastOk": 1795022421,
   "failingSince": null
  },
  "tfl-crowding": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "melbourne-parking": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "madrid-traffic": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "hongkong-traffic": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "air-traffic": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "bitcoin-mempool": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "tether-supply": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
  "canvas-status": {
   "ok": true,
-  "lastOk": 1795022001,
+  "lastOk": 1795022401,
   "unofficial": false,
   "failingSince": null
  },
@@ -229,10 +223,9 @@
   "failingSince": null
  },
  "homework-index": {
-  "ok": false,
-  "lastOk": null,
-  "failingSince": 1795013320,
-  "error": "homework basket incomplete (15/16)"
+  "ok": true,
+  "lastOk": 1795022421,
+  "failingSince": null
  },
  "nvd-cves": {
   "ok": true,
