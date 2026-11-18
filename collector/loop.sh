@@ -3,13 +3,16 @@
 # data branch checked out at ./data. Used by GitHub Actions so collection does not depend on cron timing.
 set -u
 END=$(( $(date +%s) + ${LOOP_MINUTES:-345} * 60 ))
-cd "$(dirname "$0")/.."
+# Run from the repository root (GitHub Actions starts steps there). Do not derive it from $0: the workflow runs
+# this script via `bash -c`, where $0 is "bash".
+cd "${GITHUB_WORKSPACE:-.}"
+[ -f collector/snapshot.mjs ] || { echo "collector not found in $(pwd)"; exit 1; }
 while [ "$(date +%s)" -lt "$END" ]; do
   # Pick up collector fixes pushed to main without waiting for the next run (this script runs from memory).
   git pull -q --ff-only origin main 2>/dev/null || true
-  node collector/snapshot.mjs || true
-  node collector/history.mjs || true
-  node collector/bundle.mjs || true
+  node collector/snapshot.mjs || echo "::warning::snapshot failed"
+  node collector/history.mjs || echo "::warning::history failed"
+  node collector/bundle.mjs || echo "::warning::bundle failed"
   (
     cd data
     git add -A
