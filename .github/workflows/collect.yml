@@ -45,7 +45,7 @@ jobs:
         # Run the loop from memory so pulling a newer collector/loop.sh mid-run cannot corrupt the running script.
         run: bash -c "$(cat collector/loop.sh)"
       - name: Start the next run
-        if: always()
+        if: ${{ !cancelled() }}  # a manual cancel stops the chain; the hourly cron restarts it
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run collect.yml --repo "$GITHUB_REPOSITORY" --ref main
