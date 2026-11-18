@@ -15,9 +15,9 @@ import { DEFAULT_PARAMS, type LossParams } from './model/loss'
 import { RangeContext, type Range } from './theme'
 
 const NAV = [
-  ['pulse', 'Live'], ['effect', 'The GTA Effect'], ['moves', 'Biggest moves'], ['timeline', 'Timeline'], ['wave', 'Unlock wave'], ['attention', 'Cause'],
+  ['pulse', 'Live'], ['moves', 'Biggest moves'], ['timeline', 'Timeline'], ['wave', 'Unlock wave'], ['attention', 'Cause'],
   ['games', 'Games'], ['productivity', 'Work'], ['energy', 'Grid'], ['commute', 'Commute'], ['mobility', 'Streets'],
-  ['safety', 'Crime'], ['lifestyle', 'Home life'], ['markets', 'Markets'], ['crypto', 'Crypto'], ['radar', 'Radar'], ['study', 'School'], ['status', 'Load'], ['control', 'Controls'],
+  ['safety', 'Crime'], ['markets', 'Markets'], ['crypto', 'Crypto'], ['radar', 'Radar'], ['study', 'School'], ['status', 'Load'], ['control', 'Controls'], ['lifestyle', 'Home life'], ['effect', 'The GTA Effect'],
   ['loss', 'Scenario'], ['method', 'Method'],
 ] as const
 
@@ -51,11 +51,11 @@ export default function App() {
       </nav>
       <main>
         <LivePulse />
-        <Hypotheses />
         <BiggestMoves />
         <AnomalyFeed />
         <UnlockMap />
         <AllSections />
+        <Hypotheses />
         <LossModel params={lossParams} setParams={setLossParams} />
         <Trailers />
         <Methodology />
