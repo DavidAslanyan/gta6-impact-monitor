@@ -17,7 +17,7 @@ const NAV = [
   ['pulse', 'Live'], ['timeline', 'Timeline'], ['wave', 'Unlock wave'], ['attention', 'Cause'], ['games', 'Games'],
   ['productivity', 'Work'], ['study', 'School'], ['commute', 'Commute'], ['markets', 'Markets'], ['crypto', 'Crypto'],
   ['energy', 'Grid'], ['mobility', 'Streets'], ['radar', 'Radar'], ['status', 'Load'], ['control', 'Controls'],
-  ['loss', 'Scenario'], ['method', 'Method'], ['author', 'Author'],
+  ['loss', 'Scenario'], ['method', 'Method'],
 ] as const
 
 function readParams(): LossParams {
