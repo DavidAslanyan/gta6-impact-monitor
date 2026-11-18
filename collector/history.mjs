@@ -322,7 +322,7 @@ const HISTORY = [
   {
     key: 'fred',
     async run() {
-      const csv = await getText('https://fred.stlouisfed.org/graph/fredgraph.csv?id=ICSA&cosd=2026-01-01', { timeoutMs: 60000 });
+      const csv = await getText('https://fred.stlouisfed.org/graph/fredgraph.csv?id=ICSA&cosd=2026-01-01', { timeoutMs: 120000 });
       const pts = csv.split('\n').slice(1).filter(Boolean).map((l) => {
         const [d, v] = l.split(',');
         return [Date.parse(d) / 1000, +v];
