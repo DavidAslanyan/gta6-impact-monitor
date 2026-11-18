@@ -217,7 +217,7 @@ const HISTORY = [
     key: 'grid-eia',
     async run(backfill) {
       const key = process.env.EIA_API_KEY;
-      if (!key) return {};
+      if (!key) return null; // not configured: skip without marking the backfill as done
       const start = new Date((now - (backfill ? 35 : 3) * DAY) * 1000).toISOString().slice(0, 13);
       const out = {};
       for (const ba of ['ERCO', 'PJM', 'NYIS', 'MISO', 'ISNE']) {
@@ -225,6 +225,25 @@ const HISTORY = [
           `https://api.eia.gov/v2/electricity/rto/region-data/data/?api_key=${key}&frequency=hourly&data[0]=value&facets[type][]=D&facets[respondent][]=${ba}&start=${start}&sort[0][column]=period&sort[0][direction]=asc&length=5000`,
         );
         out[`energy.us.${ba.toLowerCase()}.demand_mw`] = (j.response?.data || []).map((r) => [Date.parse(r.period + ':00Z') / 1000, +r.value]);
+      }
+      return out;
+    },
+  },
+  {
+    key: 'cloudflare-radar',
+    async run(backfill) {
+      const token = process.env.CLOUDFLARE_API_TOKEN;
+      if (!token) return null;
+      const out = {};
+      for (const cc of ['NZ', 'AU', 'JP', 'GB', 'DE', 'FR', 'US', 'BR']) {
+        const j = await getJson(
+          `https://api.cloudflare.com/client/v4/radar/http/timeseries?location=${cc}&dateRange=${backfill ? '28d' : '2d'}&aggInterval=1h&format=json`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const s = j.result?.serie_0;
+        if (!s) continue;
+        out[`internet.cf.${cc.toLowerCase()}.http`] = s.timestamps.map((t, i) => [Date.parse(t) / 1000, +s.values[i]]);
+        await sleep(300);
       }
       return out;
     },
@@ -248,7 +267,8 @@ const HISTORY = [
           out['dev.github.prs.hourly'].push([t, p.total_count]);
           await sleep(2100);
         } catch (e) {
-          if (String(e.message).includes('403') || String(e.message).includes('429')) await sleep(60000);
+          // Rate-limited: stop here; the next run re-fetches these hours (each run re-checks the last 6 complete hours).
+          if (/HTTP (403|429)/.test(String(e.message))) break;
         }
       }
       return out;
@@ -314,6 +334,7 @@ await Promise.all(
     const t0 = Date.now();
     try {
       const out = await src.run(backfill);
+      if (out === null) { console.log(`  · ${src.key}: not configured, skipped`); return; }
       let n = 0;
       for (const [id, pts] of Object.entries(out)) {
         if (!pts?.length) continue;
