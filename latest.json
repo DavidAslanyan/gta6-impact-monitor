@@ -1,187 +1,187 @@
 {
  "steam.top100.players": [
-  1795087200,
-  5259071
+  1795087500,
+  5332244
  ],
  "steam.top10.players": [
-  1795087200,
-  2776022
+  1795087500,
+  2820209
  ],
  "steam.app.tf2.players": [
-  1795087200,
+  1795087500,
   94615
  ],
  "steam.app.dota2.players": [
-  1795087200,
+  1795087500,
   597089
  ],
  "steam.app.cs2.players": [
-  1795087200,
-  712728
+  1795087500,
+  738029
  ],
  "steam.app.rust.players": [
-  1795087200,
-  57592
+  1795087500,
+  60229
  ],
  "steam.app.gta5.players": [
-  1795087200,
+  1795087500,
   56993
  ],
  "steam.app.pubg.players": [
-  1795087200,
+  1795087500,
   416604
  ],
  "steam.app.bg3.players": [
-  1795087200,
+  1795087500,
   19175
  ],
  "steam.app.apex.players": [
-  1795087200,
+  1795087500,
   104248
  ],
  "steam.app.rdr2.players": [
-  1795087200,
+  1795087500,
   26639
  ],
  "steam.app.marvel-rivals.players": [
-  1795087200,
-  24579
+  1795087500,
+  25099
  ],
  "roblox.top.players": [
-  1795087200,
-  4396194
+  1795087500,
+  4436233
  ],
  "roblox.top10.players": [
-  1795087200,
-  2325755
+  1795087500,
+  2340233
  ],
  "kick.top.viewers": [
-  1795087200,
-  793670
+  1795087500,
+  798125
  ],
  "kick.gta6.viewers": [
-  1795087200,
-  458656
+  1795087500,
+  465641
  ],
  "kick.gta5.viewers": [
-  1795087200,
-  50944
+  1795087500,
+  52125
  ],
  "kick.justchatting.viewers": [
-  1795087200,
-  83301
+  1795087500,
+  82794
  ],
  "kick.cs2.viewers": [
-  1795087200,
-  19031
+  1795087500,
+  20184
  ],
  "kick.gta6.share": [
-  1795087200,
-  57.789
+  1795087500,
+  58.342
  ],
  "bike.nyc.available": [
-  1795087200,
-  35591
+  1795087500,
+  35520
  ],
  "bike.nyc.docks": [
-  1795087200,
-  31467
+  1795087500,
+  31537
  ],
  "bike.toronto.available": [
-  1795087200,
-  8230
+  1795087500,
+  8245
  ],
  "bike.paris.available": [
-  1795087200,
-  19395
+  1795087500,
+  19600
  ],
  "bike.paris.docks": [
-  1795087200,
-  29253
+  1795087500,
+  29050
  ],
  "bike.london.available": [
-  1795087200,
-  8455
+  1795087500,
+  8446
  ],
  "traffic.nyc.speed_mph": [
-  1795087200,
-  43.33
+  1795087500,
+  43.37
  ],
  "footfall.melbourne.per_min": [
-  1795087200,
+  1795087500,
   635.2
  ],
  "status.psn.issues": [
-  1795087200,
+  1795087500,
   3
  ],
  "status.discord.level": [
-  1795087200,
+  1795087500,
   0
  ],
  "status.twitch.level": [
-  1795087200,
+  1795087500,
   0
  ],
  "status.epic.level": [
-  1795087200,
+  1795087500,
   0
  ],
  "status.xbox.level": [
-  1795087200,
+  1795087500,
   0
  ],
  "status.github.level": [
-  1795087200,
+  1795087500,
   0
  ],
  "status.cloudflare.level": [
-  1795087200,
+  1795087500,
   1
  ],
  "appstore.us.playstation.rank": [
-  1795087200,
+  1795087500,
   8
  ],
  "appstore.us.xbox.rank": [
-  1795087200,
+  1795087500,
   201
  ],
  "appstore.us.twitch.rank": [
-  1795087200,
+  1795087500,
   28
  ],
  "appstore.us.discord.rank": [
-  1795087200,
+  1795087500,
   47
  ],
  "appstore.us.doordash.rank": [
-  1795087200,
+  1795087500,
   44
  ],
  "appstore.us.ubereats.rank": [
-  1795087200,
+  1795087500,
   81
  ],
  "live.bluesky.posts_per_sec": [
-  1795087200,
-  40.15
+  1795087500,
+  37.15
  ],
  "live.bluesky.gta_per_min": [
-  1795087200,
-  21
+  1795087500,
+  24
  ],
  "live.wiki.edits_per_sec": [
-  1795087200,
-  18.2
+  1795087500,
+  21.4
  ],
  "live.wiki.human_edits_per_sec": [
-  1795087200,
-  11.15
+  1795087500,
+  14.5
  ],
  "control.weather.london.temp_c": [
   1795086000,
-  7.9
+  7.6
  ],
  "control.weather.paris.temp_c": [
   1795086000,
@@ -216,8 +216,8 @@
   57090977910
  ],
  "energy.gb.demand_mw": [
-  1795086600,
-  39953
+  1795087200,
+  39714
  ],
  "control.us.jobless_claims.weekly": [
   1794009600,
@@ -225,7 +225,7 @@
  ],
  "energy.nz.generation_mwh.daily": [
   1794999600,
-  109389.1
+  114138.7
  ],
  "attention.wiki.gta6.en.daily": [
   1794960000,
@@ -289,11 +289,11 @@
  ],
  "dev.github.commits.hourly": [
   1795082400,
-  519882
+  521577
  ],
  "dev.github.prs.hourly": [
   1795082400,
-  55639
+  55648
  ],
  "crypto.btc.price": [
   1795082400,
@@ -312,24 +312,24 @@
   32833
  ],
  "mkt.ttwo.price": [
-  1795086900,
-  210.84
+  1795087200,
+  211.4
  ],
  "mkt.sony.price": [
-  1795086900,
+  1795087200,
   27.3
  ],
  "mkt.msft.price": [
-  1795086900,
-  514.92
+  1795087200,
+  514.99
  ],
  "mkt.nvda.price": [
-  1795086900,
-  153.64
+  1795087200,
+  153.7
  ],
  "mkt.amd.price": [
-  1795086900,
-  545.6
+  1795087200,
+  546.2
  ],
  "mkt.gme.price": [
   1795084800,
@@ -340,20 +340,20 @@
   14.11
  ],
  "mkt.rblx.price": [
-  1795086600,
-  47.31
+  1795087200,
+  47.22
  ],
  "mkt.nflx.price": [
-  1795086900,
-  60.14
+  1795087200,
+  60.09
  ],
  "mkt.dash.price": [
-  1795078800,
-  169.39
+  1795087200,
+  168.1
  ],
  "mkt.uber.price": [
-  1795086900,
-  69.39
+  1795087200,
+  69.41
  ],
  "mkt.spx.price": [
   1795044900,
@@ -368,75 +368,75 @@
   59444.21
  ],
  "mkt.ftse.price": [
-  1795086900,
-  10520.03
+  1795087200,
+  10522.6
  ],
  "mkt.nzx50.price": [
   1795060800,
   14247.25
  ],
  "mkt.vix.price": [
-  1795086900,
-  22.09
+  1795087200,
+  22.1
  ],
  "mkt.crude.price": [
-  1795086900,
-  83.29
+  1795087200,
+  83.31
  ],
  "mkt.gold.price": [
-  1795086900,
-  3728.9
+  1795087200,
+  3728.2
  ],
  "mkt.nzdusd.price": [
-  1795086900,
-  0.5527
+  1795087200,
+  0.5525
  ],
  "commute.london.tube_crowding_pct": [
-  1795087200,
-  15.34
+  1795087500,
+  14.63
  ],
  "commute.melbourne.parking_occupied_pct": [
-  1795087200,
+  1795087500,
   34.06
  ],
  "traffic.madrid.vehicles_per_hour": [
-  1795087200,
-  2200922
+  1795087500,
+  2233628
  ],
  "traffic.madrid.sensors": [
-  1795087200,
+  1795087500,
   4894
  ],
  "traffic.hongkong.speed_kmh": [
-  1795087200,
-  69.8
+  1795087500,
+  70.22
  ],
  "traffic.hongkong.volume": [
-  1795087200,
-  22403
+  1795087500,
+  22052
  ],
  "air.nyc.aircraft": [
-  1795087200,
-  140
+  1795087500,
+  165
  ],
  "air.london.aircraft": [
-  1795087200,
-  249
+  1795087500,
+  246
  ],
  "air.frankfurt.aircraft": [
-  1795087200,
-  244
+  1795087500,
+  238
  ],
  "air.tokyo.aircraft": [
-  1795087200,
-  85
+  1795087500,
+  81
  ],
  "crypto.usdt.supply_usd": [
-  1795087200,
+  1795087500,
   187957166351
  ],
  "status.canvas.level": [
-  1795087200,
+  1795087500,
   0
  ],
  "radar.cisa_kev_added.daily": [
@@ -476,15 +476,15 @@
   722
  ],
  "crypto.btc.mempool_tx": [
-  1795087200,
-  61833
+  1795087500,
+  62993
  ],
  "crypto.btc.fee_fastest_sat_vb": [
-  1795087200,
-  2
+  1795087500,
+  3
  ],
  "crypto.btc.tx_per_block": [
-  1795087200,
+  1795087500,
   5850
  ],
  "control.us.jobless_claims_nsa.weekly": [
