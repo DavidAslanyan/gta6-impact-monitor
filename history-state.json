@@ -1,11 +1,11 @@
 {
  "weather": {
   "backfilled": true,
-  "lastRun": 1795180820
+  "lastRun": 1795181120
  },
  "grid-fr": {
   "backfilled": true,
-  "lastRun": 1795180820
+  "lastRun": 1795181120
  },
  "npm": {
   "backfilled": true,
@@ -13,7 +13,7 @@
  },
  "grid-gb": {
   "backfilled": true,
-  "lastRun": 1795180820
+  "lastRun": 1795181120
  },
  "fred": {
   "backfilled": true,
@@ -21,7 +21,7 @@
  },
  "grid-nz": {
   "backfilled": true,
-  "lastRun": 1795177521
+  "lastRun": 1795181120
  },
  "wikipedia": {
   "backfilled": true,
@@ -29,23 +29,23 @@
  },
  "grid-au": {
   "backfilled": true,
-  "lastRun": 1795180820
+  "lastRun": 1795181120
  },
  "grid-caiso": {
   "backfilled": true,
-  "lastRun": 1795180820
+  "lastRun": 1795181120
  },
  "github-activity": {
   "backfilled": true,
-  "lastRun": 1795180820
+  "lastRun": 1795181120
  },
  "crypto": {
   "backfilled": true,
-  "lastRun": 1795180820
+  "lastRun": 1795181120
  },
  "markets": {
   "backfilled": true,
-  "lastRun": 1795180820
+  "lastRun": 1795181120
  },
  "cisa-kev": {
   "backfilled": true,
@@ -89,10 +89,10 @@
  },
  "wiki-curiosity": {
   "backfilled": true,
-  "lastRun": 1795177521
+  "lastRun": 1795181120
  },
  "city-incidents": {
   "backfilled": true,
-  "lastRun": 1795177521
+  "lastRun": 1795181120
  }
 }
