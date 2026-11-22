@@ -1,11 +1,11 @@
 {
  "weather": {
   "backfilled": true,
-  "lastRun": 1795328421
+  "lastRun": 1795328720
  },
  "grid-fr": {
   "backfilled": true,
-  "lastRun": 1795328421
+  "lastRun": 1795328720
  },
  "npm": {
   "backfilled": true,
@@ -13,7 +13,7 @@
  },
  "grid-gb": {
   "backfilled": true,
-  "lastRun": 1795328421
+  "lastRun": 1795328720
  },
  "fred": {
   "backfilled": true,
@@ -21,7 +21,7 @@
  },
  "grid-nz": {
   "backfilled": true,
-  "lastRun": 1795325121
+  "lastRun": 1795328720
  },
  "wikipedia": {
   "backfilled": true,
@@ -29,23 +29,23 @@
  },
  "grid-au": {
   "backfilled": true,
-  "lastRun": 1795328421
+  "lastRun": 1795328720
  },
  "grid-caiso": {
   "backfilled": true,
-  "lastRun": 1795328421
+  "lastRun": 1795328720
  },
  "github-activity": {
   "backfilled": true,
-  "lastRun": 1795328421
+  "lastRun": 1795328720
  },
  "crypto": {
   "backfilled": true,
-  "lastRun": 1795328421
+  "lastRun": 1795328720
  },
  "markets": {
   "backfilled": true,
-  "lastRun": 1795328421
+  "lastRun": 1795328720
  },
  "cisa-kev": {
   "backfilled": true,
@@ -81,18 +81,18 @@
  },
  "homework-index": {
   "backfilled": true,
-  "lastRun": 1795324964
+  "lastRun": 1795328720
  },
  "netflix-weekly": {
   "backfilled": true,
-  "lastRun": 1795307121
+  "lastRun": 1795328720
  },
  "wiki-curiosity": {
   "backfilled": true,
-  "lastRun": 1795325121
+  "lastRun": 1795328720
  },
  "city-incidents": {
   "backfilled": true,
-  "lastRun": 1795325121
+  "lastRun": 1795328720
  }
 }
