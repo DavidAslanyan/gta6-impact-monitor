@@ -1,11 +1,11 @@
 {
  "weather": {
   "backfilled": true,
-  "lastRun": 1795360821
+  "lastRun": 1795361121
  },
  "grid-fr": {
   "backfilled": true,
-  "lastRun": 1795360821
+  "lastRun": 1795361121
  },
  "npm": {
   "backfilled": true,
@@ -13,7 +13,7 @@
  },
  "grid-gb": {
   "backfilled": true,
-  "lastRun": 1795360821
+  "lastRun": 1795361121
  },
  "fred": {
   "backfilled": true,
@@ -21,7 +21,7 @@
  },
  "grid-nz": {
   "backfilled": true,
-  "lastRun": 1795357521
+  "lastRun": 1795361121
  },
  "wikipedia": {
   "backfilled": true,
@@ -29,23 +29,23 @@
  },
  "grid-au": {
   "backfilled": true,
-  "lastRun": 1795360821
+  "lastRun": 1795361121
  },
  "grid-caiso": {
   "backfilled": true,
-  "lastRun": 1795360821
+  "lastRun": 1795361121
  },
  "github-activity": {
   "backfilled": true,
-  "lastRun": 1795360821
+  "lastRun": 1795361121
  },
  "crypto": {
   "backfilled": true,
-  "lastRun": 1795360821
+  "lastRun": 1795361121
  },
  "markets": {
   "backfilled": true,
-  "lastRun": 1795360821
+  "lastRun": 1795361121
  },
  "cisa-kev": {
   "backfilled": true,
@@ -81,7 +81,7 @@
  },
  "homework-index": {
   "backfilled": true,
-  "lastRun": 1795357521
+  "lastRun": 1795361121
  },
  "netflix-weekly": {
   "backfilled": true,
@@ -89,10 +89,10 @@
  },
  "wiki-curiosity": {
   "backfilled": true,
-  "lastRun": 1795357521
+  "lastRun": 1795361121
  },
  "city-incidents": {
   "backfilled": true,
-  "lastRun": 1795357521
+  "lastRun": 1795361121
  }
 }
