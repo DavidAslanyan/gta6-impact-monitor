@@ -1,11 +1,11 @@
 {
  "weather": {
   "backfilled": true,
-  "lastRun": 1795634720
+  "lastRun": 1795635021
  },
  "grid-fr": {
   "backfilled": true,
-  "lastRun": 1795634720
+  "lastRun": 1795635021
  },
  "npm": {
   "backfilled": true,
@@ -13,7 +13,7 @@
  },
  "grid-gb": {
   "backfilled": true,
-  "lastRun": 1795634720
+  "lastRun": 1795635021
  },
  "fred": {
   "backfilled": true,
@@ -29,23 +29,23 @@
  },
  "grid-au": {
   "backfilled": true,
-  "lastRun": 1795634720
+  "lastRun": 1795635021
  },
  "grid-caiso": {
   "backfilled": true,
-  "lastRun": 1795634720
+  "lastRun": 1795635021
  },
  "github-activity": {
   "backfilled": true,
-  "lastRun": 1795634720
+  "lastRun": 1795635021
  },
  "crypto": {
   "backfilled": true,
-  "lastRun": 1795634720
+  "lastRun": 1795635021
  },
  "markets": {
   "backfilled": true,
-  "lastRun": 1795634720
+  "lastRun": 1795635021
  },
  "cisa-kev": {
   "backfilled": true,
@@ -93,6 +93,6 @@
  },
  "city-incidents": {
   "backfilled": true,
-  "lastRun": 1795631421
+  "lastRun": 1795635021
  }
 }
